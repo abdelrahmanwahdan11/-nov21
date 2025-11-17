@@ -10,7 +10,7 @@ class HotelsController extends ChangeNotifier {
     _visible = _all.take(_pageSize).toList();
   }
 
-  final int _pageSize = 2;
+  final int _pageSize = 3;
   List<Hotel> _all = [];
   List<Hotel> _visible = [];
   final Set<String> _favorites = {};

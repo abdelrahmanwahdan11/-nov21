@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconly/iconly.dart';
 import '../../controllers/bookings_controller.dart';
 import '../../controllers/hotels_controller.dart';
 import '../../core/localization/app_localizations.dart';
@@ -6,6 +7,7 @@ import '../../core/utils/dummy_data.dart';
 import '../home/favorites_screen.dart';
 import 'my_trips_screen.dart';
 import 'reward_options_screen.dart';
+import 'rewards_wallet_screen.dart';
 
 class RewardsProfileTabScreen extends StatelessWidget {
   const RewardsProfileTabScreen({super.key, required this.bookingsController, required this.hotelsController});
@@ -25,18 +27,35 @@ class RewardsProfileTabScreen extends StatelessWidget {
             children: [
               Text(t.translate('rewards'), style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 12),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(t.translate('points_balance')),
-                      const SizedBox(height: 8),
-                      LinearProgressIndicator(value: 0.4, minHeight: 10, borderRadius: BorderRadius.circular(12)),
-                    ],
-                  ),
-                ),
+              AnimatedBuilder(
+                animation: bookingsController,
+                builder: (_, __) {
+                  return Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(t.translate('points_balance')),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: LinearProgressIndicator(
+                                  value: (bookingsController.pointsBalance % 3000) / 3000,
+                                  minHeight: 10,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text('${bookingsController.pointsBalance}'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 16),
               _QuickActions(t: t, bookingsController: bookingsController, hotelsController: hotelsController),
@@ -129,38 +148,55 @@ class _QuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: _ActionCard(
-            label: t.translate('open_favorites'),
-            icon: Icons.favorite_border,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => FavoritesScreen(
-                  hotelsController: hotelsController,
-                  bookingsController: bookingsController,
+        Row(
+          children: [
+            Expanded(
+              child: _ActionCard(
+                label: t.translate('open_favorites'),
+                icon: Icons.favorite_border,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => FavoritesScreen(
+                      hotelsController: hotelsController,
+                      bookingsController: bookingsController,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _ActionCard(
+                label: t.translate('open_bookings'),
+                icon: Icons.route,
+                onTap: () => Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (_) => MyTripsScreen(bookingsController: bookingsController))),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _ActionCard(
-            label: t.translate('open_bookings'),
-            icon: Icons.route,
-            onTap: () => Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => MyTripsScreen(bookingsController: bookingsController))),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _ActionCard(
-            label: t.translate('open_rewards'),
-            icon: Icons.card_giftcard,
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => RewardOptionsScreen())),
-          ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _ActionCard(
+                label: t.translate('open_rewards'),
+                icon: Icons.card_giftcard,
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => RewardOptionsScreen())),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _ActionCard(
+                label: t.translate('view_wallet'),
+                icon: IconlyBold.wallet,
+                onTap: () => Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (_) => RewardsWalletScreen(bookingsController: bookingsController))),
+              ),
+            ),
+          ],
         ),
       ],
     );

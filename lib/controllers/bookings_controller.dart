@@ -10,6 +10,7 @@ class BookingsController extends ChangeNotifier {
 
   List<Booking> _bookings = [];
   bool _seeded = false;
+  int _points = 2400;
 
   List<Booking> get all => List.unmodifiable(_bookings);
   List<Booking> get upcoming =>
@@ -17,16 +18,23 @@ class BookingsController extends ChangeNotifier {
   List<Booking> get inHouse => _bookings.where((b) => b.status == BookingStatus.checkedIn).toList();
   List<Booking> get past =>
       _bookings.where((b) => b.status == BookingStatus.completed || b.status == BookingStatus.cancelled).toList();
+  int get pointsBalance => _points;
 
   void seedHotels(List<Hotel> hotels) {
     if (_seeded || hotels.isEmpty) return;
     _bookings = buildDummyBookings(hotels);
+    _points += _bookings
+        .where((b) => b.status == BookingStatus.completed)
+        .fold<int>(0, (sum, b) => sum + b.pointsEarned);
     _seeded = true;
     notifyListeners();
   }
 
   void addBooking(Booking booking) {
     _bookings.add(booking);
+    if (booking.status == BookingStatus.completed) {
+      _points += booking.pointsEarned;
+    }
     notifyListeners();
   }
 
@@ -35,11 +43,42 @@ class BookingsController extends ChangeNotifier {
   }
 
   void complete(String id) {
+    final booking = _find(id);
+    if (booking == null) return;
+    if (booking.status != BookingStatus.completed) {
+      _points += booking.pointsEarned;
+    }
     _updateStatus(id, BookingStatus.completed);
   }
 
   void cancel(String id) {
     _updateStatus(id, BookingStatus.cancelled);
+  }
+
+  void addNote(String id, String note) {
+    _bookings = _bookings
+        .map((b) => b.id == id
+            ? b.copyWith(
+                note: note,
+              )
+            : b)
+        .toList();
+    notifyListeners();
+  }
+
+  bool redeemPoints(int cost) {
+    if (cost > _points) return false;
+    _points -= cost;
+    notifyListeners();
+    return true;
+  }
+
+  Booking? _find(String id) {
+    try {
+      return _bookings.firstWhere((element) => element.id == id);
+    } catch (_) {
+      return null;
+    }
   }
 
   void _updateStatus(String id, BookingStatus status) {

@@ -4,6 +4,7 @@ import 'package:iconly/iconly.dart';
 import '../../controllers/bookings_controller.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../models/booking.dart';
+import 'booking_detail_screen.dart';
 
 class MyTripsScreen extends StatelessWidget {
   const MyTripsScreen({super.key, required this.bookingsController});
@@ -27,13 +28,39 @@ class MyTripsScreen extends StatelessWidget {
               if (upcoming.isEmpty)
                 _EmptyState(message: t.translate('no_upcoming'))
               else
-                ...upcoming.map((b) => _TripCard(booking: b, bookingsController: bookingsController)),
+                ...upcoming.map(
+                  (b) => _TripCard(
+                    booking: b,
+                    bookingsController: bookingsController,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => BookingDetailScreen(
+                          bookingId: b.id,
+                          controller: bookingsController,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               const SizedBox(height: 20),
               _SectionTitle(title: t.translate('past_trips'), icon: IconlyBold.time_circle),
               if (past.isEmpty)
                 _EmptyState(message: t.translate('no_history'))
               else
-                ...past.map((b) => _TripCard(booking: b, bookingsController: bookingsController)),
+                ...past.map(
+                  (b) => _TripCard(
+                    booking: b,
+                    bookingsController: bookingsController,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => BookingDetailScreen(
+                          bookingId: b.id,
+                          controller: bookingsController,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           );
         },
@@ -64,73 +91,77 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _TripCard extends StatelessWidget {
-  const _TripCard({required this.booking, required this.bookingsController});
+  const _TripCard({required this.booking, required this.bookingsController, this.onTap});
 
   final Booking booking;
   final BookingsController bookingsController;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final chipColor = _statusColor(context, booking.status);
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(booking.hotelName, style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 4),
-                    Text('${booking.city} · ${booking.checkIn.toLocal().toString().split(' ').first}'),
-                  ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(booking.hotelName, style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 4),
+                      Text('${booking.city} · ${booking.checkIn.toLocal().toString().split(' ').first}'),
+                    ],
+                  ),
                 ),
-              ),
-              Chip(
-                label: Text(t.translate(booking.status.name)),
-                backgroundColor: chipColor.withOpacity(0.15),
-                labelStyle: TextStyle(color: chipColor),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              const Icon(IconlyLight.calendar),
-              const SizedBox(width: 8),
-              Text('${booking.nights} ${t.translate('nights')} · ${booking.guests} ${t.translate('guests')}'),
-              const Spacer(),
-              Text('${booking.price.toStringAsFixed(0)} AED'),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              TextButton(
-                onPressed: booking.status == BookingStatus.upcoming ? () => bookingsController.checkIn(booking.id) : null,
-                child: Text(t.translate('check_in')),
-              ),
-              TextButton(
-                onPressed: booking.status == BookingStatus.checkedIn ? () => bookingsController.complete(booking.id) : null,
-                child: Text(t.translate('check_out')),
-              ),
-              const Spacer(),
-              IconButton(
-                onPressed: booking.status == BookingStatus.upcoming ? () => bookingsController.cancel(booking.id) : null,
-                icon: const Icon(Icons.cancel_outlined),
-              )
-            ],
-          )
-        ],
+                Chip(
+                  label: Text(t.translate(booking.status.name)),
+                  backgroundColor: chipColor.withOpacity(0.15),
+                  labelStyle: TextStyle(color: chipColor),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Icon(IconlyLight.calendar),
+                const SizedBox(width: 8),
+                Text('${booking.nights} ${t.translate('nights')} · ${booking.guests} ${t.translate('guests')}'),
+                const Spacer(),
+                Text('${booking.price.toStringAsFixed(0)} AED'),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                TextButton(
+                  onPressed: booking.status == BookingStatus.upcoming ? () => bookingsController.checkIn(booking.id) : null,
+                  child: Text(t.translate('check_in')),
+                ),
+                TextButton(
+                  onPressed: booking.status == BookingStatus.checkedIn ? () => bookingsController.complete(booking.id) : null,
+                  child: Text(t.translate('check_out')),
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: booking.status == BookingStatus.upcoming ? () => bookingsController.cancel(booking.id) : null,
+                  icon: const Icon(Icons.cancel_outlined),
+                )
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
