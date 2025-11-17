@@ -20,6 +20,7 @@ class Booking {
     this.tasks = const [],
     this.documents = const [],
     this.journal = const [],
+    this.segments = const [],
   });
 
   final String id;
@@ -38,6 +39,7 @@ class Booking {
   final List<TripTask> tasks;
   final List<TravelDocument> documents;
   final List<TripJournalEntry> journal;
+  final List<TripSegment> segments;
 
   String get hotelName => hotel.name;
   String get city => hotel.city;
@@ -50,6 +52,9 @@ class Booking {
   double get docsProgress => documents.isEmpty
       ? 1
       : documents.where((doc) => doc.ready).length / documents.length;
+  double get itineraryProgress => segments.isEmpty
+      ? 1
+      : segments.where((seg) => seg.done).length / segments.length;
 
   Booking copyWith({
     String? id,
@@ -68,6 +73,7 @@ class Booking {
     List<TripTask>? tasks,
     List<TravelDocument>? documents,
     List<TripJournalEntry>? journal,
+    List<TripSegment>? segments,
   }) {
     return Booking(
       id: id ?? this.id,
@@ -86,6 +92,7 @@ class Booking {
       tasks: tasks ?? this.tasks,
       documents: documents ?? this.documents,
       journal: journal ?? this.journal,
+      segments: segments ?? this.segments,
     );
   }
 }
@@ -132,6 +139,24 @@ class TripJournalEntry {
       title: title ?? this.title,
       createdAt: createdAt ?? this.createdAt,
       detail: detail ?? this.detail,
+    );
+  }
+}
+
+class TripSegment {
+  const TripSegment({required this.title, required this.time, this.note, this.done = false});
+
+  final String title;
+  final String time;
+  final String? note;
+  final bool done;
+
+  TripSegment copyWith({String? title, String? time, String? note, bool? done}) {
+    return TripSegment(
+      title: title ?? this.title,
+      time: time ?? this.time,
+      note: note ?? this.note,
+      done: done ?? this.done,
     );
   }
 }

@@ -111,6 +111,29 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
           detail: 'Reserved couples massage at 6 PM on day 2.',
         ),
       ],
+      segments: const [
+        TripSegment(
+          title: 'Airport pickup',
+          time: 'Day 1 · 3:00 PM',
+          note: 'Driver meets at arrivals gate 6',
+        ),
+        TripSegment(
+          title: 'Check-in & welcome drink',
+          time: 'Day 1 · 4:00 PM',
+          note: 'Ask for high floor Gulf view',
+        ),
+        TripSegment(
+          title: 'Sunset dinner',
+          time: 'Day 1 · 7:30 PM',
+          note: 'Book terrace table',
+        ),
+        TripSegment(
+          title: 'Pool morning',
+          time: 'Day 2 · 10:00 AM',
+          done: true,
+          note: 'Use spa access after swim',
+        ),
+      ],
     ),
     Booking(
       id: 'b2',
@@ -138,6 +161,24 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
           title: 'Checked in via app',
           createdAt: DateTime.now().subtract(const Duration(hours: 6)),
           detail: 'Mobile key ready at 4 PM.',
+        ),
+      ],
+      segments: const [
+        TripSegment(
+          title: 'Client meeting',
+          time: 'Day 1 · 11:00 AM',
+          done: true,
+          note: 'Boardroom level 12',
+        ),
+        TripSegment(
+          title: 'Gym & recovery',
+          time: 'Day 1 · 6:00 PM',
+          note: 'Steam room booking',
+        ),
+        TripSegment(
+          title: 'Check-out ride',
+          time: 'Day 2 · 4:00 PM',
+          note: 'Use ride-share credit',
         ),
       ],
     ),
@@ -173,6 +214,25 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
         TripJournalEntry(
           title: 'Late checkout approved',
           createdAt: DateTime.now().subtract(const Duration(days: 17)),
+        ),
+      ],
+      segments: const [
+        TripSegment(
+          title: 'Rooftop coffee',
+          time: 'Day 1 · 9:00 AM',
+          done: true,
+          note: 'Try local roast',
+        ),
+        TripSegment(
+          title: 'Souq walk',
+          time: 'Day 1 · 2:00 PM',
+          done: true,
+          note: 'Pick up spices',
+        ),
+        TripSegment(
+          title: 'Checkout',
+          time: 'Day 2 · 12:00 PM',
+          done: true,
         ),
       ],
     ),

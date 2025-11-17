@@ -103,6 +103,22 @@ class BookingsController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleSegment(String bookingId, String title) {
+    _bookings = _bookings
+        .map(
+          (b) => b.id == bookingId
+              ? b.copyWith(
+                  segments: b.segments
+                      .map((segment) =>
+                          segment.title == title ? segment.copyWith(done: !segment.done) : segment)
+                      .toList(),
+                )
+              : b,
+        )
+        .toList();
+    notifyListeners();
+  }
+
   void addJournalEntry(String bookingId, TripJournalEntry entry) {
     _bookings = _bookings
         .map(

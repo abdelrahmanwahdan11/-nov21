@@ -132,6 +132,62 @@ class BookingDetailScreen extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('itinerary')),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  t.translate('day_plan_progress'),
+                                  style: Theme.of(context).textTheme.labelLarge,
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: LinearProgressIndicator(
+                                        value: booking.itineraryProgress,
+                                        minHeight: 6,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text('${(booking.itineraryProgress * 100).round()}%'),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                if (booking.segments.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                    child: Text(t.translate('no_itinerary')),
+                                  )
+                                else
+                                  ...booking.segments.map(
+                                    (segment) => CheckboxListTile(
+                                      value: segment.done,
+                                      dense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                      title: Text(segment.title),
+                                      subtitle: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(segment.time),
+                                          if (segment.note != null) Text(segment.note!),
+                                        ],
+                                      ),
+                                      onChanged: (_) => controller.toggleSegment(booking.id, segment.title),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
                         _SectionTitle(title: t.translate('trip_preparation')),
                         const SizedBox(height: 8),
                         Container(

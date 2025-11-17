@@ -101,6 +101,8 @@ class _TripCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final chipColor = _statusColor(context, booking.status);
+    final nextSegment = booking.segments.where((s) => !s.done).toList();
+    final nextStop = nextSegment.isNotEmpty ? nextSegment.first : null;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -172,6 +174,34 @@ class _TripCard extends StatelessWidget {
                 Text('${(booking.docsProgress * 100).round()}%'),
               ],
             ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(IconlyLight.time_circle),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: LinearProgressIndicator(
+                    value: booking.itineraryProgress,
+                    minHeight: 6,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text('${(booking.itineraryProgress * 100).round()}%'),
+              ],
+            ),
+            if (nextStop != null) ...[
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(IconlyLight.paper),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text('${t.translate('next_step')}: ${nextStop.title} • ${nextStop.time}'),
+                  ),
+                ],
+              )
+            ],
             const SizedBox(height: 12),
             Row(
               children: [
