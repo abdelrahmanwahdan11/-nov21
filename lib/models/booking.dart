@@ -17,6 +17,7 @@ class Booking {
     this.note,
     this.isRefundable = true,
     this.pointsEarned = 0,
+    this.tasks = const [],
   });
 
   final String id;
@@ -32,12 +33,16 @@ class Booking {
   final String? note;
   final bool isRefundable;
   final int pointsEarned;
+  final List<TripTask> tasks;
 
   String get hotelName => hotel.name;
   String get city => hotel.city;
   DateTime get checkIn => date;
   DateTime get checkOut => date.add(Duration(days: nights));
   double get price => hotel.price * nights;
+  double get checklistProgress => tasks.isEmpty
+      ? 1
+      : tasks.where((task) => task.done).length / tasks.length;
 
   Booking copyWith({
     String? id,
@@ -53,6 +58,7 @@ class Booking {
     String? note,
     bool? isRefundable,
     int? pointsEarned,
+    List<TripTask>? tasks,
   }) {
     return Booking(
       id: id ?? this.id,
@@ -68,6 +74,21 @@ class Booking {
       note: note ?? this.note,
       isRefundable: isRefundable ?? this.isRefundable,
       pointsEarned: pointsEarned ?? this.pointsEarned,
+      tasks: tasks ?? this.tasks,
+    );
+  }
+}
+
+class TripTask {
+  const TripTask({required this.title, this.done = false});
+
+  final String title;
+  final bool done;
+
+  TripTask copyWith({String? title, bool? done}) {
+    return TripTask(
+      title: title ?? this.title,
+      done: done ?? this.done,
     );
   }
 }

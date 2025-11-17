@@ -132,6 +132,51 @@ class BookingDetailScreen extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('trip_preparation')),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: LinearProgressIndicator(
+                                        value: booking.checklistProgress,
+                                        minHeight: 6,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text('${(booking.checklistProgress * 100).round()}%'),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                ...booking.tasks.map(
+                                  (task) => CheckboxListTile(
+                                    value: task.done,
+                                    dense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                    title: Text(task.title),
+                                    onChanged: (_) => controller.toggleTask(booking.id, task.title),
+                                  ),
+                                ),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton(
+                                    onPressed: () => controller.completeChecklist(booking.id),
+                                    child: Text(t.translate('complete_all')),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
                           _SectionTitle(title: t.translate('notes')),
                           const SizedBox(height: 8),
                           _InfoTile(

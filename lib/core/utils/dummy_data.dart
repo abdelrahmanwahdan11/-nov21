@@ -94,6 +94,11 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
       perks: const ['Late checkout', 'Club lounge access'],
       transport: 'Complimentary airport pickup',
       pointsEarned: 480,
+      tasks: const [
+        TripTask(title: 'Confirm airport pickup'),
+        TripTask(title: 'Share arrival time with hotel'),
+        TripTask(title: 'Add pillow preference', done: true),
+      ],
     ),
     Booking(
       id: 'b2',
@@ -107,6 +112,11 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
       perks: const ['Breakfast included'],
       transport: 'Ride-share credit ready',
       pointsEarned: 260,
+      tasks: const [
+        TripTask(title: 'Upload passport copy', done: true),
+        TripTask(title: 'Request quiet room'),
+        TripTask(title: 'Add late checkout request'),
+      ],
     ),
     Booking(
       id: 'b3',
@@ -122,6 +132,11 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
       note: 'Quiet room requested',
       isRefundable: false,
       pointsEarned: 180,
+      tasks: const [
+        TripTask(title: 'Review stay notes', done: true),
+        TripTask(title: 'Add loyalty number', done: true),
+        TripTask(title: 'Share checkout feedback', done: true),
+      ],
     ),
   ];
 }

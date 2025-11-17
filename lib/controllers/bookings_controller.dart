@@ -73,6 +73,32 @@ class BookingsController extends ChangeNotifier {
     return true;
   }
 
+  void toggleTask(String bookingId, String title) {
+    _bookings = _bookings
+        .map(
+          (b) => b.id == bookingId
+              ? b.copyWith(
+                  tasks: b.tasks
+                      .map((task) => task.title == title ? task.copyWith(done: !task.done) : task)
+                      .toList(),
+                )
+              : b,
+        )
+        .toList();
+    notifyListeners();
+  }
+
+  void completeChecklist(String bookingId) {
+    _bookings = _bookings
+        .map(
+          (b) => b.id == bookingId
+              ? b.copyWith(tasks: b.tasks.map((task) => task.copyWith(done: true)).toList())
+              : b,
+        )
+        .toList();
+    notifyListeners();
+  }
+
   Booking? _find(String id) {
     try {
       return _bookings.firstWhere((element) => element.id == id);

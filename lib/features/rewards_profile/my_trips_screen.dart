@@ -142,6 +142,20 @@ class _TripCard extends StatelessWidget {
                 Text('${booking.price.toStringAsFixed(0)} AED'),
               ],
             ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: LinearProgressIndicator(
+                    value: booking.checklistProgress,
+                    minHeight: 6,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text('${(booking.checklistProgress * 100).round()}%'),
+              ],
+            ),
             const SizedBox(height: 12),
             Row(
               children: [
