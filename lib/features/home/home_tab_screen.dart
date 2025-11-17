@@ -10,6 +10,8 @@ import '../../core/widgets/section_header.dart';
 import '../../core/widgets/skeleton_loader.dart';
 import '../../models/booking.dart';
 import '../../models/hotel.dart';
+import '../rewards_profile/my_trips_screen.dart';
+import 'favorites_screen.dart';
 import '../hotel_detail/hotel_detail_screen.dart';
 
 class HomeTabScreen extends StatelessWidget {
@@ -25,7 +27,6 @@ class HomeTabScreen extends StatelessWidget {
     return AnimatedBuilder(
       animation: hotelsController,
       builder: (context, _) {
-        bookingsController.seedHotels(hotelsController.visible);
         final hotels = hotelsController.visible;
         return RefreshIndicator(
           onRefresh: hotelsController.refresh,
@@ -34,26 +35,85 @@ class HomeTabScreen extends StatelessWidget {
             children: [
               SectionHeader(title: t.translate('welcome'), action: const Icon(IconlyLight.location)),
               const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => FavoritesScreen(
+                            hotelsController: hotelsController,
+                            bookingsController: bookingsController,
+                          ),
+                        ),
+                      ),
+                      icon: const Icon(IconlyLight.heart),
+                      label: Text(t.translate('open_favorites')),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => MyTripsScreen(bookingsController: bookingsController),
+                        ),
+                      ),
+                      icon: const Icon(IconlyLight.calendar),
+                      label: Text(t.translate('open_bookings')),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
               _FeaturedCarousel(items: hotels),
               const SizedBox(height: 24),
-              SectionHeader(title: 'Popular stays', action: Text(t.translate('favorites'))),
-              const SizedBox(height: 12),
-              ...hotels.map((h) => _HotelCard(
-                    hotel: h,
-                    onFavorite: () => hotelsController.toggleFavorite(h.id),
-                    onCompare: () => comparisonController.toggle(h),
-                    onBook: () {
-                      bookingsController.addBooking(
-                        Booking(id: DateTime.now().toIso8601String(), hotel: h, date: DateTime.now().add(const Duration(days: 2)), nights: 2, guests: 2),
-                      );
-                    },
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => HotelDetailScreen(hotel: h)),
+              SectionHeader(
+                title: t.translate('popular_stays'),
+                action: TextButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => FavoritesScreen(
+                        hotelsController: hotelsController,
+                        bookingsController: bookingsController,
+                      ),
                     ),
-                  )),
-              if (hotelsController.isLoadingMore) ...List.generate(2, (_) => const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: SkeletonLoader(height: 120))),
-              TextButton(onPressed: hotelsController.loadMore, child: const Text('Load more')),
+                  ),
+                  child: Text(t.translate('view_all')),
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...hotels.map(
+                (h) => _HotelCard(
+                  hotel: h,
+                  onFavorite: () => hotelsController.toggleFavorite(h.id),
+                  onCompare: () => comparisonController.toggle(h),
+                  onBook: () {
+                    bookingsController.addBooking(
+                      Booking(
+                        id: DateTime.now().toIso8601String(),
+                        hotel: h,
+                        date: DateTime.now().add(const Duration(days: 2)),
+                        nights: 2,
+                        guests: 2,
+                      ),
+                    );
+                  },
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => HotelDetailScreen(hotel: h)),
+                  ),
+                ),
+              ),
+              if (hotelsController.isLoadingMore)
+                ...List.generate(
+                  2,
+                  (_) => const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: SkeletonLoader(height: 120),
+                  ),
+                ),
+              TextButton(onPressed: hotelsController.loadMore, child: Text(t.translate('load_more'))),
             ],
           ),
         );
@@ -145,7 +205,7 @@ class _HotelCard extends StatelessWidget {
                 children: [
                   PrimaryButton(text: t.translate('book_now'), onPressed: onBook),
                   const SizedBox(width: 12),
-                  OutlinedButton(onPressed: onCompare, child: const Text('Compare')),
+                  OutlinedButton(onPressed: onCompare, child: Text(t.translate('compare'))),
                   const Spacer(),
                   IconButton(
                     onPressed: () => showModalBottomSheet(

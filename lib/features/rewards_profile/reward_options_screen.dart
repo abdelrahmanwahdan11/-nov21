@@ -7,7 +7,7 @@ import '../../models/reward.dart';
 class RewardOptionsScreen extends StatelessWidget {
   RewardOptionsScreen({super.key});
 
-  final List<Reward> rewards = generateRewards();
+  final List<Reward> rewards = buildDummyRewards();
 
   @override
   Widget build(BuildContext context) {

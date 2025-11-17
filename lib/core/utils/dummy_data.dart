@@ -47,16 +47,37 @@ List<Hotel> buildDummyHotels() {
 List<Booking> buildDummyBookings(List<Hotel> hotels) {
   if (hotels.length < 2) return [];
   return [
-    Booking(id: 'b1', hotel: hotels[0], date: DateTime.now().add(const Duration(days: 5)), nights: 3, guests: 2),
-    Booking(id: 'b2', hotel: hotels[1], date: DateTime.now().subtract(const Duration(days: 20)), nights: 2, guests: 1, status: BookingStatus.completed),
+    Booking(
+      id: 'b1',
+      hotel: hotels[0],
+      date: DateTime.now().add(const Duration(days: 5)),
+      nights: 3,
+      guests: 2,
+    ),
+    Booking(
+      id: 'b2',
+      hotel: hotels[1],
+      date: DateTime.now().subtract(const Duration(days: 1)),
+      nights: 2,
+      guests: 1,
+      status: BookingStatus.checkedIn,
+    ),
+    Booking(
+      id: 'b3',
+      hotel: hotels[1],
+      date: DateTime.now().subtract(const Duration(days: 20)),
+      nights: 2,
+      guests: 1,
+      status: BookingStatus.completed,
+    ),
   ];
 }
 
 List<Reward> buildDummyRewards() {
   return [
-    Reward(title: 'Spa voucher', points: 1200),
-    Reward(title: 'Suite upgrade', points: 2600),
-    Reward(title: 'Late checkout', points: 800),
+    Reward(title: 'Spa voucher', points: 1200, description: 'Unwind with a 60-minute treatment'),
+    Reward(title: 'Suite upgrade', points: 2600, description: 'Enjoy complimentary suite upgrades'),
+    Reward(title: 'Late checkout', points: 800, description: 'Stay longer on your last day'),
   ];
 }
 

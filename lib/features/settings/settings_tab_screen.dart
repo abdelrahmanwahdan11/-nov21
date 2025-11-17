@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import '../../controllers/bookings_controller.dart';
 import '../../controllers/hotels_controller.dart';
 import '../../controllers/settings_controller.dart';
 import '../../controllers/theme_controller.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
+import '../home/favorites_screen.dart';
+import '../rewards_profile/my_trips_screen.dart';
 
 class SettingsTabScreen extends StatelessWidget {
   const SettingsTabScreen({super.key, required this.themeController, required this.settingsController, required this.hotelsController, required this.bookingsController});
@@ -11,7 +14,7 @@ class SettingsTabScreen extends StatelessWidget {
   final ThemeController themeController;
   final SettingsController settingsController;
   final HotelsController hotelsController;
-  final dynamic bookingsController;
+  final BookingsController bookingsController;
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +64,20 @@ class SettingsTabScreen extends StatelessWidget {
               value: settingsController.reduceMotion,
               onChanged: settingsController.toggleReduceMotion,
               title: Text(t.translate('reduce_motion')),
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.favorite_border),
+              title: Text(t.translate('open_favorites')),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => FavoritesScreen(hotelsController: hotelsController, bookingsController: bookingsController),
+              )),
+            ),
+            ListTile(
+              leading: const Icon(Icons.route),
+              title: Text(t.translate('open_bookings')),
+              onTap: () => Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => MyTripsScreen(bookingsController: bookingsController))),
             ),
           ],
         );

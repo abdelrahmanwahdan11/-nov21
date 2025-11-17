@@ -216,7 +216,10 @@ class _MainShellState extends State<MainShell> {
             comparisonController: widget.comparisonController,
           ).animate(target: reduceMotion ? 0 : 1).fadeIn(duration: 400.ms).slide(begin: const Offset(0.1, 0)),
           AiChatTabScreen(controller: widget.chatController),
-          RewardsProfileTabScreen(bookingsController: widget.bookingsController),
+          RewardsProfileTabScreen(
+            bookingsController: widget.bookingsController,
+            hotelsController: widget.hotelsController,
+          ),
           SettingsTabScreen(
             themeController: widget.themeController,
             settingsController: widget.settingsController,
