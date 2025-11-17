@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../models/hotel.dart';
+import '../models/search_filters.dart';
 import 'hotels_controller.dart';
 
 enum SortOption { price, rating, distance }
@@ -11,9 +12,10 @@ class SearchController extends ChangeNotifier {
   String query = '';
   List<String> tags = [];
   SortOption sortOption = SortOption.price;
+  SearchFilters filters = const SearchFilters();
 
   List<Hotel> get results {
-    final filtered = hotelsController.filter(query: query, tags: tags);
+    final filtered = hotelsController.filter(query: query, tags: tags, filters: filters);
     filtered.sort((a, b) {
       switch (sortOption) {
         case SortOption.rating:
@@ -40,6 +42,16 @@ class SearchController extends ChangeNotifier {
 
   void updateSort(SortOption option) {
     sortOption = option;
+    notifyListeners();
+  }
+
+  void updateFilters(SearchFilters value) {
+    filters = value;
+    notifyListeners();
+  }
+
+  void resetFilters() {
+    filters = const SearchFilters();
     notifyListeners();
   }
 }

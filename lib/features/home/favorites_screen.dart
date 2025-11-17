@@ -19,7 +19,7 @@ class FavoritesScreen extends StatelessWidget {
     return AnimatedBuilder(
       animation: hotelsController,
       builder: (context, _) {
-        final favorites = hotelsController.allHotels.where((h) => hotelsController.isFavorite(h)).toList();
+        final favorites = hotelsController.allHotels.where(hotelsController.isFavorite).toList();
         return Scaffold(
           appBar: AppBar(title: Text(t.translate('favorites'))),
           body: favorites.isEmpty
@@ -50,7 +50,7 @@ class FavoritesScreen extends StatelessWidget {
                       onAiInfo: () => _showInfo(context),
                       onToggleCompare: () {},
                       isInComparison: false,
-                      onToggleFavorite: () => hotelsController.toggleFavorite(hotel),
+                      onToggleFavorite: () => hotelsController.toggleFavorite(hotel.id),
                       isFavorite: true,
                     );
                   },

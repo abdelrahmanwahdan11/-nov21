@@ -13,9 +13,9 @@ class FiltersBottomSheet extends StatefulWidget {
 }
 
 class _FiltersBottomSheetState extends State<FiltersBottomSheet> {
-  late double _price = widget.controller.filters.maxPrice ?? 400;
-  late double _rating = widget.controller.filters.minRating ?? 3;
-  late double _distance = widget.controller.filters.maxDistance ?? 10;
+  late double _price = widget.controller.filters.maxPrice;
+  late double _rating = widget.controller.filters.minRating;
+  late double _distance = widget.controller.filters.maxDistance;
   late List<String> _types = List.of(widget.controller.filters.types);
 
   @override
@@ -41,7 +41,7 @@ class _FiltersBottomSheetState extends State<FiltersBottomSheet> {
               alignment: Alignment.centerLeft,
               child: Text(t.translate('hotel_type'), style: Theme.of(context).textTheme.titleMedium),
             ),
-            ...['Premium', 'Essential', 'Luxury', 'Suites'].map(
+            ...['luxury', 'business', 'urban', 'beach', 'family', 'budget', 'boutique'].map(
               (type) => CheckboxListTile(
                 value: _types.contains(type),
                 onChanged: (value) {
@@ -53,7 +53,7 @@ class _FiltersBottomSheetState extends State<FiltersBottomSheet> {
                     }
                   });
                 },
-                title: Text(type),
+                title: Text(type[0].toUpperCase() + type.substring(1)),
               ),
             ),
             const SizedBox(height: 24),

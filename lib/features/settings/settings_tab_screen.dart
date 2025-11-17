@@ -60,7 +60,7 @@ class SettingsTabScreen extends StatelessWidget {
             SwitchListTile(
               value: settingsController.reduceMotion,
               onChanged: settingsController.toggleReduceMotion,
-              title: const Text('Reduce motion'),
+              title: Text(t.translate('reduce_motion')),
             ),
           ],
         );

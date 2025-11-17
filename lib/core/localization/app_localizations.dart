@@ -5,6 +5,8 @@ class AppLocalizations {
 
   final Locale locale;
 
+  static AppLocalizations of(BuildContext context) => Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+
   static const supportedLocales = [Locale('en'), Locale('ar')];
 
   static const _localizedStrings = {
@@ -26,6 +28,20 @@ class AppLocalizations {
       'language': 'Language',
       'theme': 'Dark mode',
       'primary_color': 'Primary color',
+      'view': 'View',
+      'search_hint': 'Search hotels, cities, or tags',
+      'filters_title': 'Filters',
+      'max_price': 'Max price',
+      'min_rating': 'Min rating',
+      'max_distance': 'Max distance (km)',
+      'hotel_type': 'Hotel type',
+      'reset': 'Reset',
+      'apply': 'Apply',
+      'filters': 'Filters',
+      'sort': 'Sort',
+      'results': 'Results',
+      'load_more': 'Load more',
+      'reduce_motion': 'Reduce motion',
     },
     'ar': {
       'app_title': 'روميفاي',
@@ -45,6 +61,20 @@ class AppLocalizations {
       'language': 'اللغة',
       'theme': 'الوضع الداكن',
       'primary_color': 'اللون الأساسي',
+      'view': 'عرض',
+      'search_hint': 'ابحث عن الفنادق أو المدن أو الوسوم',
+      'filters_title': 'الفلاتر',
+      'max_price': 'أقصى سعر',
+      'min_rating': 'أدنى تقييم',
+      'max_distance': 'أقصى مسافة (كم)',
+      'hotel_type': 'نوع الفندق',
+      'reset': 'إعادة تعيين',
+      'apply': 'تطبيق',
+      'filters': 'الفلاتر',
+      'sort': 'فرز',
+      'results': 'النتائج',
+      'load_more': 'تحميل المزيد',
+      'reduce_motion': 'تقليل الحركة',
     },
   };
 

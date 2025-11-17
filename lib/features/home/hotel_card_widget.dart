@@ -65,7 +65,7 @@ class HotelCardWidget extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(height: 6),
-                      Text('${hotel.city} · ${hotel.distance}km · ⭐️${hotel.rating}'),
+                      Text('${hotel.city} · ${hotel.distanceKm}km · ⭐️${hotel.rating}'),
                       const SizedBox(height: 8),
                       Text('${hotel.price.toStringAsFixed(0)} AED / night',
                           style: Theme.of(context).textTheme.titleMedium),
