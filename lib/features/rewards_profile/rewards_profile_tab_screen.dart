@@ -4,6 +4,8 @@ import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
 import '../../models/booking.dart';
 import '../../models/reward.dart';
+import 'booking_history_widget.dart';
+import 'reward_options_screen.dart';
 
 class RewardsProfileTabScreen extends StatelessWidget {
   RewardsProfileTabScreen({super.key});
@@ -13,6 +15,7 @@ class RewardsProfileTabScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
@@ -21,11 +24,13 @@ class RewardsProfileTabScreen extends StatelessWidget {
         _buildMilestoneCard(context),
         const SizedBox(height: 12),
         ElevatedButton(
-          onPressed: () {},
-          child: Text(AppLocalizations.of(context).translate('see_rewards')),
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => RewardOptionsScreen()),
+          ),
+          child: Text(t.translate('see_rewards')),
         ),
         const SizedBox(height: 24),
-        Text('Rewards', style: Theme.of(context).textTheme.titleMedium),
+        Text(t.translate('rewards_section'), style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
         ...rewards.map((reward) => ListTile(
               title: Text(reward.title),
@@ -33,17 +38,15 @@ class RewardsProfileTabScreen extends StatelessWidget {
               trailing: Text('${reward.points} pts'),
             )),
         const SizedBox(height: 24),
-        Text('Bookings', style: Theme.of(context).textTheme.titleMedium),
-        ...bookings.map((booking) => ListTile(
-              title: Text(booking.hotelName),
-              subtitle: Text('${booking.nights} nights · ${booking.date.toLocal().toString().split(' ').first}'),
-              trailing: Text('${booking.price} AED'),
-            )),
+        Text(t.translate('booking_history'), style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        BookingHistoryWidget(bookings: bookings),
       ],
     );
   }
 
   Widget _buildPointsCard(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -52,16 +55,17 @@ class RewardsProfileTabScreen extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text('Club member', style: TextStyle(color: Colors.white60)),
-          SizedBox(height: 12),
-          Text('24,800 pts', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+        children: [
+          Text(t.translate('club_member'), style: const TextStyle(color: Colors.white60)),
+          const SizedBox(height: 12),
+          const Text('24,800 pts', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
         ],
       ),
     );
   }
 
   Widget _buildMilestoneCard(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -71,7 +75,7 @@ class RewardsProfileTabScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Milestone to 100 nights'),
+          Text(t.translate('milestone_title')),
           const SizedBox(height: 12),
           LinearProgressIndicator(
             value: 0.65,

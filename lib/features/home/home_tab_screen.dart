@@ -96,7 +96,7 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                   padding: const EdgeInsets.all(16),
                   child: OutlinedButton(
                     onPressed: widget.hotelsController.loadMore,
-                    child: const Text('Load more'),
+                    child: Text(AppLocalizations.of(context).translate('load_more')),
                   ),
                 ),
             ],

@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../controllers/auth_controller.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/widgets/primary_button.dart';
+import 'forgot_password_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -41,25 +42,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(labelText: t.translate('email_phone')),
-                  validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+                  validator: (value) => value == null || value.isEmpty ? t.translate('required') : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
                   decoration: InputDecoration(labelText: t.translate('password')),
                   obscureText: true,
-                  validator: (value) => value != null && value.length >= 6 ? null : 'Min 6 chars',
+                  validator: (value) => value != null && value.length >= 6 ? null : t.translate('min_chars'),
                 ),
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text(t.translate('forgot_password')),
-                          content: const Text('We sent a reset code to your inbox.'),
-                        ),
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
                       );
                     },
                     child: Text(t.translate('forgot_password')),

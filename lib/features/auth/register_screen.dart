@@ -35,30 +35,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
             children: [
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Name'),
-                validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+                decoration: InputDecoration(labelText: t.translate('name')),
+                validator: (value) => value == null || value.isEmpty ? t.translate('required') : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: (value) => value != null && value.contains('@') ? null : 'Invalid email',
+                decoration: InputDecoration(labelText: t.translate('email')),
+                validator: (value) => value != null && value.contains('@') ? null : t.translate('invalid_email'),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _phoneController,
-                decoration: const InputDecoration(labelText: 'Phone'),
-                validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+                decoration: InputDecoration(labelText: t.translate('phone')),
+                validator: (value) => value == null || value.isEmpty ? t.translate('required') : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: 'Password'),
+                decoration: InputDecoration(labelText: t.translate('password')),
                 onChanged: (value) {
                   setState(() => _strength = _passwordStrength(value));
                 },
-                validator: (value) => value != null && value.length >= 6 ? null : 'Min 6 chars',
+                validator: (value) => value != null && value.length >= 6 ? null : t.translate('min_chars'),
               ),
               const SizedBox(height: 8),
               LinearProgressIndicator(value: _strength, minHeight: 6, borderRadius: BorderRadius.circular(12)),
@@ -66,8 +66,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               TextFormField(
                 controller: _confirmController,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: 'Confirm password'),
-                validator: (value) => value == _passwordController.text ? null : 'Passwords must match',
+                decoration: InputDecoration(labelText: t.translate('confirm_password')),
+                validator: (value) => value == _passwordController.text ? null : t.translate('passwords_match'),
               ),
               const SizedBox(height: 24),
               PrimaryButton(

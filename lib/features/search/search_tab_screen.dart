@@ -88,8 +88,7 @@ class SearchTabScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     OutlinedButton.icon(
-                      onPressed: () => hotelsController.hotelsNotifier.value =
-                          hotelsController.hotelsNotifier.value.reversed.toList(),
+                      onPressed: () => _openSort(context),
                       icon: const Icon(Icons.sort),
                       label: Text(t.translate('sort')),
                     ),
@@ -151,7 +150,7 @@ class SearchTabScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   child: OutlinedButton(
                     onPressed: () => hotelsController.loadMore(query: searchController.queryController.text),
-                    child: const Text('Load more'),
+                    child: Text(t.translate('load_more')),
                   ),
                 ),
             ],
@@ -167,6 +166,40 @@ class SearchTabScreen extends StatelessWidget {
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
       builder: (context) => FiltersBottomSheet(controller: searchController),
+    );
+  }
+
+  void _openSort(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            title: Text(t.translate('sort_price')),
+            onTap: () {
+              hotelsController.setSort(HotelSort.price);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: Text(t.translate('sort_rating')),
+            onTap: () {
+              hotelsController.setSort(HotelSort.rating);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: Text(t.translate('sort_distance')),
+            onTap: () {
+              hotelsController.setSort(HotelSort.distance);
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
     );
   }
 

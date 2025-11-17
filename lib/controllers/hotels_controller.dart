@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import '../core/utils/dummy_data.dart';
 import '../models/hotel.dart';
 
+enum HotelSort { recommended, price, rating, distance }
+
 class HotelsController extends ChangeNotifier {
   HotelsController() {
     _allHotels = generateHotels();
@@ -19,6 +21,7 @@ class HotelsController extends ChangeNotifier {
   int _page = 1;
   final int _perPage = 6;
   String category = 'Premium';
+  HotelSort _sort = HotelSort.recommended;
 
   List<Hotel> get comparison => List.unmodifiable(_comparison);
 
@@ -65,8 +68,21 @@ class HotelsController extends ChangeNotifier {
     if (tags != null && tags.isNotEmpty) {
       filtered = filtered.where((h) => h.tags.any(tags.contains));
     }
-    final list = filtered.take(_page * _perPage).toList();
-    hotelsNotifier.value = list;
+    List<Hotel> sorted = filtered.toList();
+    switch (_sort) {
+      case HotelSort.price:
+        sorted.sort((a, b) => a.price.compareTo(b.price));
+        break;
+      case HotelSort.rating:
+        sorted.sort((b, a) => a.rating.compareTo(b.rating));
+        break;
+      case HotelSort.distance:
+        sorted.sort((a, b) => a.distance.compareTo(b.distance));
+        break;
+      case HotelSort.recommended:
+        break;
+    }
+    hotelsNotifier.value = sorted.take(_page * _perPage).toList();
   }
 
   Future<void> loadMore({String query = ''}) async {
@@ -77,6 +93,12 @@ class HotelsController extends ChangeNotifier {
     _page += 1;
     applyFilters(query: query);
     isLoadingMore = false;
+    notifyListeners();
+  }
+
+  void setSort(HotelSort sort) {
+    _sort = sort;
+    applyFilters();
     notifyListeners();
   }
 

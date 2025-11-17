@@ -44,7 +44,7 @@ class SettingsTabScreen extends StatelessWidget {
               onChanged: (_) => themeController.toggleDark(),
             ),
             SwitchListTile(
-              title: const Text('Reduce animations'),
+              title: Text(t.translate('reduce_animations')),
               value: settingsController.reduceMotion,
               onChanged: (_) => settingsController.toggleMotion(),
             ),

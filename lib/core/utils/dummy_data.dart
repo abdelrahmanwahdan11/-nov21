@@ -54,7 +54,9 @@ List<Booking> generateBookings() => List.generate(
       (index) => Booking(
         id: 'book_$index',
         hotelName: 'Serenity ${index + 2}',
-        date: DateTime.now().subtract(Duration(days: 15 * index)),
+        date: index.isEven
+            ? DateTime.now().add(Duration(days: 6 * (index + 1)))
+            : DateTime.now().subtract(Duration(days: 10 * (index + 1))),
         nights: 2 + index,
         price: 150 + index * 40,
       ),
