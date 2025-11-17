@@ -129,6 +129,14 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
         TripBudget(category: 'Transport', planned: 250, spent: 80),
         TripBudget(category: 'Activities', planned: 900, spent: 120),
       ],
+      alerts: const [
+        TravelAlert(title: 'Evening traffic near marina', severity: 'medium', detail: 'Plan 15 minutes extra'),
+        TravelAlert(title: 'Pool maintenance on day 2', severity: 'low'),
+      ],
+      tips: const [
+        CityGuideTip(title: 'Try abra ride at sunset', category: 'experience'),
+        CityGuideTip(title: 'Book spa before noon slots', category: 'wellness'),
+      ],
       tasks: const [
         TripTask(title: 'Confirm airport pickup'),
         TripTask(title: 'Share arrival time with hotel'),
@@ -216,6 +224,14 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
         TripBudget(category: 'Transport', planned: 160, spent: 60),
         TripBudget(category: 'Tips', planned: 120, spent: 40),
       ],
+      alerts: const [
+        TravelAlert(title: 'Roadworks near convention center', severity: 'medium'),
+        TravelAlert(title: 'Heat advisory midday', severity: 'high', detail: 'Carry water'),
+      ],
+      tips: const [
+        CityGuideTip(title: 'Quiet lounge on level 14', category: 'productivity'),
+        CityGuideTip(title: 'Best espresso happy hour 5-6 PM', category: 'dining'),
+      ],
       tasks: const [
         TripTask(title: 'Upload passport copy', done: true),
         TripTask(title: 'Request quiet room'),
@@ -301,6 +317,13 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
         TripBudget(category: 'Dining', planned: 500, spent: 480),
         TripBudget(category: 'Gifts', planned: 200, spent: 140),
         TripBudget(category: 'Transport', planned: 180, spent: 160),
+      ],
+      alerts: const [
+        TravelAlert(title: 'Weekend road closures near souq', severity: 'low'),
+      ],
+      tips: const [
+        CityGuideTip(title: 'Walkable old town cafes nearby', category: 'culture'),
+        CityGuideTip(title: 'Visit spice market before noon', category: 'shopping'),
       ],
       tasks: const [
         TripTask(title: 'Review stay notes', done: true),

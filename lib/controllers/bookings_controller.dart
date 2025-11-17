@@ -150,6 +150,22 @@ class BookingsController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleAlert(String bookingId, String title) {
+    _bookings = _bookings
+        .map(
+          (b) => b.id == bookingId
+              ? b.copyWith(
+                  alerts: b.alerts
+                      .map((alert) =>
+                          alert.title == title ? alert.copyWith(acknowledged: !alert.acknowledged) : alert)
+                      .toList(),
+                )
+              : b,
+        )
+        .toList();
+    notifyListeners();
+  }
+
   void togglePacking(String bookingId, String title) {
     _bookings = _bookings
         .map(

@@ -113,6 +113,10 @@ class BookingDetailScreen extends StatelessWidget {
                                 .toList(),
                           ),
                           const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('readiness_overview')),
+                          const SizedBox(height: 8),
+                          _ReadinessCard(booking: booking),
+                          const SizedBox(height: 16),
                           _SectionTitle(title: t.translate('timeline')),
                           const SizedBox(height: 8),
                           _Timeline(
@@ -291,6 +295,14 @@ class BookingDetailScreen extends StatelessWidget {
                               ],
                             ),
                           ),
+                          const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('safety_alerts')),
+                          const SizedBox(height: 8),
+                          _AlertsList(booking: booking, controller: controller),
+                          const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('local_insights')),
+                          const SizedBox(height: 8),
+                          _LocalInsights(tips: booking.tips),
                           const SizedBox(height: 16),
                           _SectionTitle(title: t.translate('trip_preparation')),
                           const SizedBox(height: 8),
@@ -973,6 +985,226 @@ class _BudgetRow extends StatelessWidget {
             icon: const Icon(IconlyLight.plus),
             tooltip: t.translate('add_expense'),
           )
+        ],
+      ),
+    );
+  }
+}
+
+class _ReadinessCard extends StatelessWidget {
+  const _ReadinessCard({required this.booking});
+
+  final Booking booking;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final readinessPercent = (booking.readinessScore * 100).round();
+    final metrics = [
+      (t.translate('trip_preparation'), booking.checklistProgress),
+      (t.translate('docs_progress'), booking.docsProgress),
+      (t.translate('itinerary'), booking.itineraryProgress),
+      (t.translate('packing_list'), booking.packingProgress),
+      (t.translate('transfers_progress'), booking.transferProgress),
+      (t.translate('dining_progress'), booking.diningProgress),
+      (t.translate('safety_alerts'), booking.alertsProgress),
+    ];
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(t.translate('overall_readiness'), style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 6),
+                    LinearProgressIndicator(
+                      value: booking.readinessScore.clamp(0, 1).toDouble(),
+                      minHeight: 8,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text('$readinessPercent%'),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: metrics
+                .map((m) => _MetricChip(label: m.$1, value: (m.$2 * 100).round()))
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetricChip extends StatelessWidget {
+  const _MetricChip({required this.label, required this.value});
+
+  final String label;
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 4),
+          Text('$value%', style: Theme.of(context).textTheme.titleSmall),
+        ],
+      ),
+    );
+  }
+}
+
+class _AlertsList extends StatelessWidget {
+  const _AlertsList({required this.booking, required this.controller});
+
+  final Booking booking;
+  final BookingsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: LinearProgressIndicator(
+                  value: booking.alertsProgress,
+                  minHeight: 6,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text('${(booking.alertsProgress * 100).round()}%'),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (booking.alerts.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(t.translate('no_alerts')),
+            )
+          else
+            ...booking.alerts.map(
+              (alert) => SwitchListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: Row(
+                  children: [
+                    Expanded(child: Text(alert.title)),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _severityColor(alert.severity).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        t.translate('severity_${alert.severity}'),
+                        style: TextStyle(color: _severityColor(alert.severity)),
+                      ),
+                    )
+                  ],
+                ),
+                subtitle: alert.detail != null ? Text(alert.detail!) : null,
+                value: alert.acknowledged,
+                onChanged: (_) => controller.toggleAlert(booking.id, alert.title),
+                secondary: const Icon(IconlyLight.shield_done),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Color _severityColor(String severity) {
+    switch (severity) {
+      case 'high':
+        return Colors.redAccent;
+      case 'medium':
+        return Colors.orangeAccent;
+      default:
+        return Colors.green;
+    }
+  }
+}
+
+class _LocalInsights extends StatelessWidget {
+  const _LocalInsights({required this.tips});
+
+  final List<CityGuideTip> tips;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(t.translate('city_tips_hint'), style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 10),
+          if (tips.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(t.translate('no_itinerary')),
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: tips
+                  .map(
+                    (tip) => Chip(
+                      label: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(tip.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                          Text(tip.category, style: Theme.of(context).textTheme.bodySmall),
+                          if (tip.detail != null) Text(tip.detail!, style: Theme.of(context).textTheme.bodySmall),
+                        ],
+                      ),
+                      backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                    ),
+                  )
+                  .toList(),
+            ),
         ],
       ),
     );

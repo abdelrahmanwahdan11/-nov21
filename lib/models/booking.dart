@@ -25,6 +25,8 @@ class Booking {
     this.budgets = const [],
     this.transfers = const [],
     this.dining = const [],
+    this.alerts = const [],
+    this.tips = const [],
   });
 
   final String id;
@@ -48,6 +50,8 @@ class Booking {
   final List<TripBudget> budgets;
   final List<TransferPlan> transfers;
   final List<DiningReservation> dining;
+  final List<TravelAlert> alerts;
+  final List<CityGuideTip> tips;
 
   String get hotelName => hotel.name;
   String get city => hotel.city;
@@ -74,6 +78,21 @@ class Booking {
       : transfers.where((transfer) => transfer.confirmed).length / transfers.length;
   double get diningProgress =>
       dining.isEmpty ? 1 : dining.where((res) => res.confirmed).length / dining.length;
+  double get alertsProgress => alerts.isEmpty
+      ? 1
+      : alerts.where((alert) => alert.acknowledged).length / alerts.length;
+  double get readinessScore {
+    final pieces = [
+      checklistProgress,
+      docsProgress,
+      itineraryProgress,
+      packingProgress,
+      transferProgress,
+      diningProgress,
+      alertsProgress,
+    ];
+    return pieces.reduce((a, b) => a + b) / pieces.length;
+  }
 
   Booking copyWith({
     String? id,
@@ -97,6 +116,8 @@ class Booking {
     List<TripBudget>? budgets,
     List<TransferPlan>? transfers,
     List<DiningReservation>? dining,
+    List<TravelAlert>? alerts,
+    List<CityGuideTip>? tips,
   }) {
     return Booking(
       id: id ?? this.id,
@@ -120,8 +141,41 @@ class Booking {
       budgets: budgets ?? this.budgets,
       transfers: transfers ?? this.transfers,
       dining: dining ?? this.dining,
+      alerts: alerts ?? this.alerts,
+      tips: tips ?? this.tips,
     );
   }
+}
+
+class TravelAlert {
+  const TravelAlert({
+    required this.title,
+    required this.severity,
+    this.detail,
+    this.acknowledged = false,
+  });
+
+  final String title;
+  final String severity;
+  final String? detail;
+  final bool acknowledged;
+
+  TravelAlert copyWith({String? title, String? severity, String? detail, bool? acknowledged}) {
+    return TravelAlert(
+      title: title ?? this.title,
+      severity: severity ?? this.severity,
+      detail: detail ?? this.detail,
+      acknowledged: acknowledged ?? this.acknowledged,
+    );
+  }
+}
+
+class CityGuideTip {
+  const CityGuideTip({required this.title, required this.category, this.detail});
+
+  final String title;
+  final String category;
+  final String? detail;
 }
 
 class TripTask {

@@ -103,6 +103,8 @@ class _TripCard extends StatelessWidget {
     final chipColor = _statusColor(context, booking.status);
     final nextSegment = booking.segments.where((s) => !s.done).toList();
     final nextStop = nextSegment.isNotEmpty ? nextSegment.first : null;
+    final readinessPercent = (booking.readinessScore * 100).round();
+    final pendingAlerts = booking.alerts.where((a) => !a.acknowledged).length;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -142,6 +144,22 @@ class _TripCard extends StatelessWidget {
                 Text('${booking.nights} ${t.translate('nights')} · ${booking.guests} ${t.translate('guests')}'),
                 const Spacer(),
                 Text('${booking.price.toStringAsFixed(0)} AED'),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.shield_outlined),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: LinearProgressIndicator(
+                    value: booking.readinessScore.clamp(0, 1).toDouble(),
+                    minHeight: 6,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text('$readinessPercent%'),
               ],
             ),
             const SizedBox(height: 10),
@@ -264,6 +282,16 @@ class _TripCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text('${(booking.diningProgress * 100).round()}%'),
+                ],
+              ),
+            ],
+            if (pendingAlerts > 0) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(IconlyLight.shield_done),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text('${t.translate('safety_alerts')}: $pendingAlerts')),
                 ],
               ),
             ],
