@@ -1,0 +1,1250 @@
+import 'package:flutter/material.dart';
+import 'package:iconly/iconly.dart';
+
+import '../../controllers/bookings_controller.dart';
+import '../../core/localization/app_localizations.dart';
+import '../../models/booking.dart';
+
+class BookingDetailScreen extends StatelessWidget {
+  const BookingDetailScreen({super.key, required this.bookingId, required this.controller});
+
+  final String bookingId;
+  final BookingsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (_, __) {
+        final booking = controller.all.firstWhere((b) => b.id == bookingId);
+        final isRtl = Directionality.of(context) == TextDirection.rtl;
+        return Scaffold(
+          body: Stack(
+            children: [
+              Positioned.fill(
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 280,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Hero(
+                              tag: booking.id,
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+                                child: Image.network(
+                                  booking.hotel.image,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 40,
+                            left: 16,
+                            child: _CircleButton(
+                              icon: Icons.arrow_back,
+                              onTap: () => Navigator.of(context).pop(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(booking.hotelName, style: Theme.of(context).textTheme.headlineSmall),
+                                    const SizedBox(height: 6),
+                                    Text('${booking.city} • ${booking.roomType}'),
+                                  ],
+                                ),
+                              ),
+                              Chip(
+                                label: Text(t.translate(booking.status.name)),
+                                backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Icon(IconlyLight.calendar, color: Theme.of(context).colorScheme.primary),
+                              const SizedBox(width: 8),
+                              Text(
+                                '${t.translate('check_in')}: ${booking.checkIn.toLocal().toString().split(' ').first}\n${t.translate('check_out')}: ${booking.checkOut.toLocal().toString().split(' ').first}',
+                              ),
+                              const Spacer(),
+                              Text('${booking.price.toStringAsFixed(0)} AED'),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              _Pill(text: '${booking.nights} ${t.translate('nights')}'),
+                              _Pill(text: '${booking.guests} ${t.translate('guests')}'),
+                              _Pill(text: booking.isRefundable ? t.translate('refundable') : t.translate('non_refundable')),
+                              _Pill(text: booking.transport),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('confirmation_code')),
+                          const SizedBox(height: 8),
+                          _InfoTile(icon: IconlyLight.document, label: booking.confirmationCode),
+                          const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('perks')),
+                          const SizedBox(height: 8),
+                          Column(
+                            children: booking.perks
+                                .map((perk) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 6.0),
+                                      child: _InfoTile(icon: Icons.star_border_rounded, label: perk),
+                                    ))
+                                .toList(),
+                          ),
+                          const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('readiness_overview')),
+                          const SizedBox(height: 8),
+                          _ReadinessCard(booking: booking),
+                          const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('timeline')),
+                          const SizedBox(height: 8),
+                          _Timeline(
+                            items: [
+                              _TimelineItem(
+                                title: t.translate('check_in'),
+                                subtitle: booking.checkIn.toLocal().toString().split(' ').first,
+                                icon: IconlyLight.calendar,
+                                isDone: booking.status != BookingStatus.upcoming,
+                              ),
+                              _TimelineItem(
+                                title: t.translate('check_out'),
+                                subtitle: booking.checkOut.toLocal().toString().split(' ').first,
+                                icon: IconlyLight.time_circle,
+                                isDone: booking.status == BookingStatus.completed,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('itinerary')),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  t.translate('day_plan_progress'),
+                                  style: Theme.of(context).textTheme.labelLarge,
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: LinearProgressIndicator(
+                                        value: booking.itineraryProgress,
+                                        minHeight: 6,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text('${(booking.itineraryProgress * 100).round()}%'),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                if (booking.segments.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                    child: Text(t.translate('no_itinerary')),
+                                  )
+                                else
+                                  ...booking.segments.map(
+                                    (segment) => CheckboxListTile(
+                                      value: segment.done,
+                                      dense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                      title: Text(segment.title),
+                                      subtitle: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(segment.time),
+                                          if (segment.note != null) Text(segment.note!),
+                                        ],
+                                      ),
+                                      onChanged: (_) => controller.toggleSegment(booking.id, segment.title),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('arrival_transfers')),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: LinearProgressIndicator(
+                                        value: booking.transferProgress,
+                                        minHeight: 6,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text('${(booking.transferProgress * 100).round()}%'),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                if (booking.transfers.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                    child: Text(t.translate('travel_support')),
+                                  )
+                                else
+                                  ...booking.transfers.map(
+                                    (transfer) => SwitchListTile(
+                                      dense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                      title: Text(transfer.title),
+                                      subtitle: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(transfer.time),
+                                          if (transfer.contact != null)
+                                            Text('${t.translate('contact')}: ${transfer.contact}'),
+                                          if (transfer.note != null) Text(transfer.note!),
+                                        ],
+                                      ),
+                                      value: transfer.confirmed,
+                                      onChanged: (_) => controller.toggleTransfer(booking.id, transfer.title),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('dining_plans')),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: LinearProgressIndicator(
+                                        value: booking.diningProgress,
+                                        minHeight: 6,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text('${(booking.diningProgress * 100).round()}%'),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                if (booking.dining.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                    child: Text(t.translate('dining_plans')),
+                                  )
+                                else
+                                  ...booking.dining.map(
+                                    (res) => SwitchListTile(
+                                      dense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                      title: Text(res.venue),
+                                      subtitle: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(res.time),
+                                          if (res.note != null) Text(res.note!),
+                                        ],
+                                      ),
+                                      value: res.confirmed,
+                                      onChanged: (_) => controller.toggleDining(booking.id, res.venue),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('safety_alerts')),
+                          const SizedBox(height: 8),
+                          _AlertsList(booking: booking, controller: controller),
+                          const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('local_insights')),
+                          const SizedBox(height: 8),
+                          _LocalInsights(tips: booking.tips),
+                          const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('trip_preparation')),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: LinearProgressIndicator(
+                                        value: booking.checklistProgress,
+                                        minHeight: 6,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text('${(booking.checklistProgress * 100).round()}%'),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                ...booking.tasks.map(
+                                  (task) => CheckboxListTile(
+                                    value: task.done,
+                                    dense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                    title: Text(task.title),
+                                    onChanged: (_) => controller.toggleTask(booking.id, task.title),
+                                  ),
+                                ),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton(
+                                    onPressed: () => controller.completeChecklist(booking.id),
+                                    child: Text(t.translate('complete_all')),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        _SectionTitle(title: t.translate('travel_documents')),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: LinearProgressIndicator(
+                                      value: booking.docsProgress,
+                                      minHeight: 6,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text('${(booking.docsProgress * 100).round()}%'),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              ...booking.documents.map(
+                                (doc) => SwitchListTile(
+                                  dense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                  title: Text(doc.title),
+                                  subtitle: doc.detail != null ? Text(doc.detail!) : null,
+                                  value: doc.ready,
+                                  onChanged: (_) => controller.toggleDocument(booking.id, doc.title),
+                                ),
+                              ),
+                              if (booking.documents.isEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Text(t.translate('docs_progress')),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _SectionTitle(title: t.translate('packing_list')),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: LinearProgressIndicator(
+                                      value: booking.packingProgress,
+                                      minHeight: 6,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text('${(booking.packingProgress * 100).round()}%'),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              if (booking.packing.isEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Text(t.translate('packing_empty')),
+                                )
+                              else
+                                ...booking.packing.map(
+                                  (item) => CheckboxListTile(
+                                    value: item.packed,
+                                    dense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                    title: Text(item.title),
+                                    subtitle: item.detail != null ? Text(item.detail!) : null,
+                                    onChanged: (_) => controller.togglePacking(booking.id, item.title),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _SectionTitle(title: t.translate('budget_overview')),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: LinearProgressIndicator(
+                                      value: booking.budgetProgress.clamp(0, 1).toDouble(),
+                                      minHeight: 6,
+                                      borderRadius: BorderRadius.circular(12),
+                                      color: booking.budgetProgress > 1
+                                          ? Colors.redAccent
+                                          : Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text('${booking.budgetSpent.toStringAsFixed(0)} / ${booking.budgetPlanned.toStringAsFixed(0)}'),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 12,
+                                runSpacing: 8,
+                                children: [
+                                  _Pill(text: '${t.translate('planned')}: ${booking.budgetPlanned.toStringAsFixed(0)}'),
+                                  _Pill(text: '${t.translate('spent')}: ${booking.budgetSpent.toStringAsFixed(0)}'),
+                                  _Pill(text: '${t.translate('remaining')}: ${(booking.budgetPlanned - booking.budgetSpent).clamp(0, booking.budgetPlanned).toStringAsFixed(0)}'),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              if (booking.budgets.isEmpty)
+                                Text(t.translate('budget_empty'))
+                              else
+                                ...booking.budgets.map(
+                                  (budget) => _BudgetRow(
+                                    budget: budget,
+                                    onAdd: () => _openBudgetSheet(context, booking, budget.category),
+                                  ),
+                                ),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton.icon(
+                                  onPressed: booking.budgets.isEmpty
+                                      ? null
+                                      : () => _openBudgetSheet(context, booking, booking.budgets.first.category),
+                                  icon: const Icon(IconlyLight.plus),
+                                  label: Text(t.translate('add_expense')),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _SectionTitle(title: t.translate('journal')),
+                        const SizedBox(height: 8),
+                        if (booking.journal.isEmpty)
+                          _InfoTile(
+                            icon: IconlyLight.paper,
+                            label: t.translate('journal_empty'),
+                            trailing: IconButton(
+                              icon: const Icon(IconlyLight.plus),
+                              onPressed: () => _openJournalSheet(context, booking),
+                            ),
+                          )
+                        else
+                          Column(
+                            children: [
+                              ...booking.journal.map((entry) => _JournalTile(entry: entry)),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton.icon(
+                                  onPressed: () => _openJournalSheet(context, booking),
+                                  icon: const Icon(IconlyLight.plus),
+                                  label: Text(t.translate('add_entry')),
+                                ),
+                              )
+                            ],
+                          ),
+                        const SizedBox(height: 16),
+                        _SectionTitle(title: t.translate('notes')),
+                        const SizedBox(height: 8),
+                        _InfoTile(
+                          icon: IconlyLight.chat,
+                          label: booking.note?.isNotEmpty == true ? booking.note! : t.translate('add_note'),
+                          trailing: IconButton(
+                            icon: const Icon(IconlyLight.edit),
+                            onPressed: () => _openNoteSheet(context, booking),
+                          ),
+                        ),
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.06),
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(IconlyLight.ticket),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(t.translate('points_earned'), style: Theme.of(context).textTheme.titleMedium),
+                                      Text(t.translate('points_earned_desc')),
+                                    ],
+                                  ),
+                                ),
+                                Text('+${booking.pointsEarned}'),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          _ActionRow(
+                            booking: booking,
+                            controller: controller,
+                            isRtl: isRtl,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _openNoteSheet(BuildContext context, Booking booking) {
+    final controllerField = TextEditingController(text: booking.note);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        final t = AppLocalizations.of(context);
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+            top: 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(t.translate('add_note'), style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              TextField(
+                controller: controllerField,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: t.translate('notes_hint'),
+                  filled: true,
+                  fillColor: Theme.of(context).cardColor,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton(
+                  onPressed: () {
+                    controller.addNote(booking.id, controllerField.text.trim());
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(t.translate('save')),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _openJournalSheet(BuildContext context, Booking booking) {
+    final controllerField = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        final t = AppLocalizations.of(context);
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+            top: 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(t.translate('add_entry'), style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              TextField(
+                controller: controllerField,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: t.translate('entry_hint'),
+                  filled: true,
+                  fillColor: Theme.of(context).cardColor,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (controllerField.text.trim().isEmpty) return;
+                    controller.addJournalEntry(
+                      booking.id,
+                      TripJournalEntry(title: controllerField.text.trim(), createdAt: DateTime.now()),
+                    );
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(t.translate('save')),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _openBudgetSheet(BuildContext context, Booking booking, String category) {
+    final amountController = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        final t = AppLocalizations.of(context);
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+            top: 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(t.translate('add_expense'), style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Text(t.translate('expense_for', params: {'category': category})),
+              const SizedBox(height: 8),
+              TextField(
+                controller: amountController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  hintText: t.translate('expense_amount_hint'),
+                  filled: true,
+                  fillColor: Theme.of(context).cardColor,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton(
+                  onPressed: () {
+                    final value = double.tryParse(amountController.text.trim()) ?? 0;
+                    if (value <= 0) return;
+                    controller.addBudgetSpend(booking.id, category, value);
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(t.translate('save')),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _CircleButton extends StatelessWidget {
+  const _CircleButton({required this.icon, required this.onTap});
+
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.35),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: Colors.white),
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(title, style: Theme.of(context).textTheme.titleMedium);
+  }
+}
+
+class _Pill extends StatelessWidget {
+  const _Pill({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Text(text),
+    );
+  }
+}
+
+class _InfoTile extends StatelessWidget {
+  const _InfoTile({required this.icon, required this.label, this.trailing});
+
+  final IconData icon;
+  final String label;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 10),
+          Expanded(child: Text(label)),
+          if (trailing != null) trailing!,
+        ],
+      ),
+    );
+  }
+}
+
+class _JournalTile extends StatelessWidget {
+  const _JournalTile({required this.entry});
+
+  final TripJournalEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final dateLabel = entry.createdAt.toLocal().toString().split(' ').first;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(IconlyLight.document),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(entry.title, style: Theme.of(context).textTheme.titleSmall),
+                if (entry.detail != null) ...[
+                  const SizedBox(height: 4),
+                  Text(entry.detail!),
+                ],
+                const SizedBox(height: 4),
+                Text(dateLabel, style: Theme.of(context).textTheme.bodySmall),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Timeline extends StatelessWidget {
+  const _Timeline({required this.items});
+
+  final List<_TimelineItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        for (var i = 0; i < items.length; i++) ...[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                children: [
+                  _Dot(done: items[i].isDone),
+                  if (i < items.length - 1)
+                    Container(
+                      width: 2,
+                      height: 40,
+                      color: items[i].isDone ? Theme.of(context).colorScheme.primary : Colors.grey.shade400,
+                    ),
+                ],
+              ),
+              const SizedBox(width: 12),
+              Icon(items[i].icon, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(items[i].title, style: Theme.of(context).textTheme.titleSmall),
+                    Text(items[i].subtitle),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (i < items.length - 1) const SizedBox(height: 8),
+        ]
+      ],
+    );
+  }
+}
+
+class _TimelineItem {
+  _TimelineItem({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    this.isDone = false,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final bool isDone;
+}
+
+class _Dot extends StatelessWidget {
+  const _Dot({required this.done});
+
+  final bool done;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 14,
+      height: 14,
+      decoration: BoxDecoration(
+        color: done ? Theme.of(context).colorScheme.primary : Colors.grey.shade400,
+        shape: BoxShape.circle,
+      ),
+    );
+  }
+}
+
+class _BudgetRow extends StatelessWidget {
+  const _BudgetRow({required this.budget, required this.onAdd});
+
+  final TripBudget budget;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final progress = budget.planned == 0 ? 0 : (budget.spent / budget.planned).clamp(0, 1);
+    final over = budget.spent > budget.planned;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: Text(budget.category, style: Theme.of(context).textTheme.titleSmall)),
+                    Text('${budget.spent.toStringAsFixed(0)} / ${budget.planned.toStringAsFixed(0)}'),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 6,
+                  borderRadius: BorderRadius.circular(12),
+                  color: over ? Colors.redAccent : Theme.of(context).colorScheme.primary,
+                  backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+                ),
+                if (budget.note != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(budget.note!, style: Theme.of(context).textTheme.bodySmall),
+                  ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: onAdd,
+            icon: const Icon(IconlyLight.plus),
+            tooltip: t.translate('add_expense'),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class _ReadinessCard extends StatelessWidget {
+  const _ReadinessCard({required this.booking});
+
+  final Booking booking;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final readinessPercent = (booking.readinessScore * 100).round();
+    final metrics = [
+      (t.translate('trip_preparation'), booking.checklistProgress),
+      (t.translate('docs_progress'), booking.docsProgress),
+      (t.translate('itinerary'), booking.itineraryProgress),
+      (t.translate('packing_list'), booking.packingProgress),
+      (t.translate('transfers_progress'), booking.transferProgress),
+      (t.translate('dining_progress'), booking.diningProgress),
+      (t.translate('safety_alerts'), booking.alertsProgress),
+    ];
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(t.translate('overall_readiness'), style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 6),
+                    LinearProgressIndicator(
+                      value: booking.readinessScore.clamp(0, 1).toDouble(),
+                      minHeight: 8,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text('$readinessPercent%'),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: metrics
+                .map((m) => _MetricChip(label: m.$1, value: (m.$2 * 100).round()))
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetricChip extends StatelessWidget {
+  const _MetricChip({required this.label, required this.value});
+
+  final String label;
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 4),
+          Text('$value%', style: Theme.of(context).textTheme.titleSmall),
+        ],
+      ),
+    );
+  }
+}
+
+class _AlertsList extends StatelessWidget {
+  const _AlertsList({required this.booking, required this.controller});
+
+  final Booking booking;
+  final BookingsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: LinearProgressIndicator(
+                  value: booking.alertsProgress,
+                  minHeight: 6,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text('${(booking.alertsProgress * 100).round()}%'),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (booking.alerts.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(t.translate('no_alerts')),
+            )
+          else
+            ...booking.alerts.map(
+              (alert) => SwitchListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: Row(
+                  children: [
+                    Expanded(child: Text(alert.title)),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _severityColor(alert.severity).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        t.translate('severity_${alert.severity}'),
+                        style: TextStyle(color: _severityColor(alert.severity)),
+                      ),
+                    )
+                  ],
+                ),
+                subtitle: alert.detail != null ? Text(alert.detail!) : null,
+                value: alert.acknowledged,
+                onChanged: (_) => controller.toggleAlert(booking.id, alert.title),
+                secondary: const Icon(IconlyLight.shield_done),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Color _severityColor(String severity) {
+    switch (severity) {
+      case 'high':
+        return Colors.redAccent;
+      case 'medium':
+        return Colors.orangeAccent;
+      default:
+        return Colors.green;
+    }
+  }
+}
+
+class _LocalInsights extends StatelessWidget {
+  const _LocalInsights({required this.tips});
+
+  final List<CityGuideTip> tips;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(t.translate('city_tips_hint'), style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 10),
+          if (tips.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(t.translate('no_itinerary')),
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: tips
+                  .map(
+                    (tip) => Chip(
+                      label: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(tip.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                          Text(tip.category, style: Theme.of(context).textTheme.bodySmall),
+                          if (tip.detail != null) Text(tip.detail!, style: Theme.of(context).textTheme.bodySmall),
+                        ],
+                      ),
+                      backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                    ),
+                  )
+                  .toList(),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionRow extends StatelessWidget {
+  const _ActionRow({required this.booking, required this.controller, required this.isRtl});
+
+  final Booking booking;
+  final BookingsController controller;
+  final bool isRtl;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    return Row(
+      children: [
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: booking.status == BookingStatus.upcoming
+                ? () => controller.checkIn(booking.id)
+                : booking.status == BookingStatus.checkedIn
+                    ? () => controller.complete(booking.id)
+                    : null,
+            icon: Icon(isRtl ? IconlyBold.login : IconlyBold.logout),
+            label: Text(
+              booking.status == BookingStatus.checkedIn ? t.translate('check_out') : t.translate('check_in'),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: booking.status == BookingStatus.upcoming ? () => controller.cancel(booking.id) : null,
+            icon: const Icon(IconlyLight.close_square),
+            label: Text(t.translate('cancel')),
+          ),
+        ),
+      ],
+    );
+  }
+}
