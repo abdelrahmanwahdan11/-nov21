@@ -190,6 +190,47 @@ class _TripCard extends StatelessWidget {
                 Text('${(booking.itineraryProgress * 100).round()}%'),
               ],
             ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(IconlyLight.bag_2),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: LinearProgressIndicator(
+                    value: booking.packingProgress,
+                    minHeight: 6,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text('${(booking.packingProgress * 100).round()}%'),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(IconlyLight.wallet),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      LinearProgressIndicator(
+                        value: booking.budgetProgress.clamp(0, 1).toDouble(),
+                        minHeight: 6,
+                        borderRadius: BorderRadius.circular(12),
+                        color: booking.budgetProgress > 1
+                            ? Colors.redAccent
+                            : Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(height: 4),
+                      Text('${t.translate('spent')}: ${booking.budgetSpent.toStringAsFixed(0)} / ${booking.budgetPlanned.toStringAsFixed(0)}',
+                          style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+              ],
+            ),
             if (nextStop != null) ...[
               const SizedBox(height: 6),
               Row(

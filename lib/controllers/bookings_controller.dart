@@ -119,6 +119,40 @@ class BookingsController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void togglePacking(String bookingId, String title) {
+    _bookings = _bookings
+        .map(
+          (b) => b.id == bookingId
+              ? b.copyWith(
+                  packing: b.packing
+                      .map((item) => item.title == title ? item.copyWith(packed: !item.packed) : item)
+                      .toList(),
+                )
+              : b,
+        )
+        .toList();
+    notifyListeners();
+  }
+
+  void addBudgetSpend(String bookingId, String category, double amount) {
+    _bookings = _bookings
+        .map(
+          (b) => b.id == bookingId
+              ? b.copyWith(
+                  budgets: b.budgets
+                      .map(
+                        (budget) => budget.category == category
+                            ? budget.copyWith(spent: (budget.spent + amount).clamp(0, budget.planned * 2))
+                            : budget,
+                      )
+                      .toList(),
+                )
+              : b,
+        )
+        .toList();
+    notifyListeners();
+  }
+
   void addJournalEntry(String bookingId, TripJournalEntry entry) {
     _bookings = _bookings
         .map(

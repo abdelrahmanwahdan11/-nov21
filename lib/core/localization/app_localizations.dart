@@ -95,6 +95,16 @@ class AppLocalizations {
       'travel_documents': 'Travel documents',
       'docs_progress': 'Document readiness',
       'docs_ready': 'Mark as ready',
+      'packing_list': 'Packing list',
+      'packing_empty': 'Add your essentials to stay ready',
+      'budget_overview': 'Budget overview',
+      'budget_empty': 'No budget items yet',
+      'planned': 'Planned',
+      'spent': 'Spent',
+      'remaining': 'Remaining',
+      'add_expense': 'Add expense',
+      'expense_for': 'Add spend for {category}',
+      'expense_amount_hint': 'Amount (AED)',
       'journal': 'Trip journal',
       'add_entry': 'Add entry',
       'entry_hint': 'Capture a memory, reminder, or tip',
@@ -192,6 +202,16 @@ class AppLocalizations {
       'travel_documents': 'وثائق السفر',
       'docs_progress': 'جاهزية الوثائق',
       'docs_ready': 'وضعها جاهزة',
+      'packing_list': 'قائمة التجهيز',
+      'packing_empty': 'أضف المستلزمات الضرورية لتكون جاهزاً',
+      'budget_overview': 'ميزانية الرحلة',
+      'budget_empty': 'لا توجد بنود ميزانية بعد',
+      'planned': 'المخطط',
+      'spent': 'المصروف',
+      'remaining': 'المتبقي',
+      'add_expense': 'إضافة مصروف',
+      'expense_for': 'أضف مصروف لفئة {category}',
+      'expense_amount_hint': 'المبلغ (درهم)',
       'journal': 'مذكرات الرحلة',
       'add_entry': 'إضافة ملاحظة',
       'entry_hint': 'دوّن ذكرى أو تذكيراً أو نصيحة',
@@ -206,7 +226,15 @@ class AppLocalizations {
     },
   };
 
-  String translate(String key) => _localizedStrings[locale.languageCode]?[key] ?? key;
+  String translate(String key, {Map<String, String>? params}) {
+    var value = _localizedStrings[locale.languageCode]?[key] ?? key;
+    if (params != null) {
+      params.forEach((paramKey, paramValue) {
+        value = value.replaceAll('{$paramKey}', paramValue);
+      });
+    }
+    return value;
+  }
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

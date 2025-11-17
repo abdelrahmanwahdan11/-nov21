@@ -277,6 +277,112 @@ class BookingDetailScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
+                        _SectionTitle(title: t.translate('packing_list')),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: LinearProgressIndicator(
+                                      value: booking.packingProgress,
+                                      minHeight: 6,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text('${(booking.packingProgress * 100).round()}%'),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              if (booking.packing.isEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Text(t.translate('packing_empty')),
+                                )
+                              else
+                                ...booking.packing.map(
+                                  (item) => CheckboxListTile(
+                                    value: item.packed,
+                                    dense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                    title: Text(item.title),
+                                    subtitle: item.detail != null ? Text(item.detail!) : null,
+                                    onChanged: (_) => controller.togglePacking(booking.id, item.title),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _SectionTitle(title: t.translate('budget_overview')),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: LinearProgressIndicator(
+                                      value: booking.budgetProgress.clamp(0, 1).toDouble(),
+                                      minHeight: 6,
+                                      borderRadius: BorderRadius.circular(12),
+                                      color: booking.budgetProgress > 1
+                                          ? Colors.redAccent
+                                          : Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text('${booking.budgetSpent.toStringAsFixed(0)} / ${booking.budgetPlanned.toStringAsFixed(0)}'),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 12,
+                                runSpacing: 8,
+                                children: [
+                                  _Pill(text: '${t.translate('planned')}: ${booking.budgetPlanned.toStringAsFixed(0)}'),
+                                  _Pill(text: '${t.translate('spent')}: ${booking.budgetSpent.toStringAsFixed(0)}'),
+                                  _Pill(text: '${t.translate('remaining')}: ${(booking.budgetPlanned - booking.budgetSpent).clamp(0, booking.budgetPlanned).toStringAsFixed(0)}'),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              if (booking.budgets.isEmpty)
+                                Text(t.translate('budget_empty'))
+                              else
+                                ...booking.budgets.map(
+                                  (budget) => _BudgetRow(
+                                    budget: budget,
+                                    onAdd: () => _openBudgetSheet(context, booking, budget.category),
+                                  ),
+                                ),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton.icon(
+                                  onPressed: booking.budgets.isEmpty
+                                      ? null
+                                      : () => _openBudgetSheet(context, booking, booking.budgets.first.category),
+                                  icon: const Icon(IconlyLight.plus),
+                                  label: Text(t.translate('add_expense')),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
                         _SectionTitle(title: t.translate('journal')),
                         const SizedBox(height: 8),
                         if (booking.journal.isEmpty)
@@ -452,6 +558,62 @@ class BookingDetailScreen extends StatelessWidget {
                       booking.id,
                       TripJournalEntry(title: controllerField.text.trim(), createdAt: DateTime.now()),
                     );
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(t.translate('save')),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _openBudgetSheet(BuildContext context, Booking booking, String category) {
+    final amountController = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        final t = AppLocalizations.of(context);
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+            top: 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(t.translate('add_expense'), style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Text(t.translate('expense_for', params: {'category': category})),
+              const SizedBox(height: 8),
+              TextField(
+                controller: amountController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  hintText: t.translate('expense_amount_hint'),
+                  filled: true,
+                  fillColor: Theme.of(context).cardColor,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton(
+                  onPressed: () {
+                    final value = double.tryParse(amountController.text.trim()) ?? 0;
+                    if (value <= 0) return;
+                    controller.addBudgetSpend(booking.id, category, value);
                     Navigator.of(context).pop();
                   },
                   child: Text(t.translate('save')),
@@ -656,6 +818,58 @@ class _Dot extends StatelessWidget {
       decoration: BoxDecoration(
         color: done ? Theme.of(context).colorScheme.primary : Colors.grey.shade400,
         shape: BoxShape.circle,
+      ),
+    );
+  }
+}
+
+class _BudgetRow extends StatelessWidget {
+  const _BudgetRow({required this.budget, required this.onAdd});
+
+  final TripBudget budget;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final progress = budget.planned == 0 ? 0 : (budget.spent / budget.planned).clamp(0, 1);
+    final over = budget.spent > budget.planned;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: Text(budget.category, style: Theme.of(context).textTheme.titleSmall)),
+                    Text('${budget.spent.toStringAsFixed(0)} / ${budget.planned.toStringAsFixed(0)}'),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 6,
+                  borderRadius: BorderRadius.circular(12),
+                  color: over ? Colors.redAccent : Theme.of(context).colorScheme.primary,
+                  backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+                ),
+                if (budget.note != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(budget.note!, style: Theme.of(context).textTheme.bodySmall),
+                  ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: onAdd,
+            icon: const Icon(IconlyLight.plus),
+            tooltip: t.translate('add_expense'),
+          )
+        ],
       ),
     );
   }

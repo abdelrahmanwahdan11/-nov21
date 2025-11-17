@@ -21,6 +21,8 @@ class Booking {
     this.documents = const [],
     this.journal = const [],
     this.segments = const [],
+    this.packing = const [],
+    this.budgets = const [],
   });
 
   final String id;
@@ -40,6 +42,8 @@ class Booking {
   final List<TravelDocument> documents;
   final List<TripJournalEntry> journal;
   final List<TripSegment> segments;
+  final List<PackingItem> packing;
+  final List<TripBudget> budgets;
 
   String get hotelName => hotel.name;
   String get city => hotel.city;
@@ -55,6 +59,12 @@ class Booking {
   double get itineraryProgress => segments.isEmpty
       ? 1
       : segments.where((seg) => seg.done).length / segments.length;
+  double get packingProgress => packing.isEmpty
+      ? 1
+      : packing.where((item) => item.packed).length / packing.length;
+  double get budgetPlanned => budgets.fold(0, (sum, b) => sum + b.planned);
+  double get budgetSpent => budgets.fold(0, (sum, b) => sum + b.spent);
+  double get budgetProgress => budgetPlanned == 0 ? 0 : budgetSpent / budgetPlanned;
 
   Booking copyWith({
     String? id,
@@ -74,6 +84,8 @@ class Booking {
     List<TravelDocument>? documents,
     List<TripJournalEntry>? journal,
     List<TripSegment>? segments,
+    List<PackingItem>? packing,
+    List<TripBudget>? budgets,
   }) {
     return Booking(
       id: id ?? this.id,
@@ -93,6 +105,8 @@ class Booking {
       documents: documents ?? this.documents,
       journal: journal ?? this.journal,
       segments: segments ?? this.segments,
+      packing: packing ?? this.packing,
+      budgets: budgets ?? this.budgets,
     );
   }
 }
@@ -157,6 +171,42 @@ class TripSegment {
       time: time ?? this.time,
       note: note ?? this.note,
       done: done ?? this.done,
+    );
+  }
+}
+
+class PackingItem {
+  const PackingItem({required this.title, this.packed = false, this.detail});
+
+  final String title;
+  final bool packed;
+  final String? detail;
+
+  PackingItem copyWith({String? title, bool? packed, String? detail}) {
+    return PackingItem(
+      title: title ?? this.title,
+      packed: packed ?? this.packed,
+      detail: detail ?? this.detail,
+    );
+  }
+}
+
+class TripBudget {
+  const TripBudget({required this.category, required this.planned, this.spent = 0, this.note});
+
+  final String category;
+  final double planned;
+  final double spent;
+  final String? note;
+
+  double get remaining => (planned - spent).clamp(0, planned);
+
+  TripBudget copyWith({String? category, double? planned, double? spent, String? note}) {
+    return TripBudget(
+      category: category ?? this.category,
+      planned: planned ?? this.planned,
+      spent: spent ?? this.spent,
+      note: note ?? this.note,
     );
   }
 }

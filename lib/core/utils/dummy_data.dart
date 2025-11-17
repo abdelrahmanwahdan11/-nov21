@@ -94,6 +94,17 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
       perks: const ['Late checkout', 'Club lounge access'],
       transport: 'Complimentary airport pickup',
       pointsEarned: 480,
+      packing: const [
+        PackingItem(title: 'Smart casual outfits'),
+        PackingItem(title: 'Swimming gear', packed: true),
+        PackingItem(title: 'Camera batteries'),
+        PackingItem(title: 'Gift for concierge', detail: 'Small chocolate box'),
+      ],
+      budgets: const [
+        TripBudget(category: 'Dining', planned: 800, spent: 150),
+        TripBudget(category: 'Transport', planned: 250, spent: 80),
+        TripBudget(category: 'Activities', planned: 900, spent: 120),
+      ],
       tasks: const [
         TripTask(title: 'Confirm airport pickup'),
         TripTask(title: 'Share arrival time with hotel'),
@@ -147,6 +158,16 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
       perks: const ['Breakfast included'],
       transport: 'Ride-share credit ready',
       pointsEarned: 260,
+      packing: const [
+        PackingItem(title: 'Business attire', packed: true),
+        PackingItem(title: 'Laptop & charger', packed: true),
+        PackingItem(title: 'Noise cancelling headphones'),
+      ],
+      budgets: const [
+        TripBudget(category: 'Dining', planned: 400, spent: 220),
+        TripBudget(category: 'Transport', planned: 160, spent: 60),
+        TripBudget(category: 'Tips', planned: 120, spent: 40),
+      ],
       tasks: const [
         TripTask(title: 'Upload passport copy', done: true),
         TripTask(title: 'Request quiet room'),
@@ -196,6 +217,16 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
       note: 'Quiet room requested',
       isRefundable: false,
       pointsEarned: 180,
+      packing: const [
+        PackingItem(title: 'Light jacket', packed: true),
+        PackingItem(title: 'Reusable bottle', packed: true),
+        PackingItem(title: 'Portable wifi'),
+      ],
+      budgets: const [
+        TripBudget(category: 'Dining', planned: 500, spent: 480),
+        TripBudget(category: 'Gifts', planned: 200, spent: 140),
+        TripBudget(category: 'Transport', planned: 180, spent: 160),
+      ],
       tasks: const [
         TripTask(title: 'Review stay notes', done: true),
         TripTask(title: 'Add loyalty number', done: true),
