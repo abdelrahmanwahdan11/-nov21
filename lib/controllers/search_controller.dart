@@ -49,6 +49,7 @@ class SearchController extends ChangeNotifier {
       maxDistance: filters.maxDistance,
       types: filters.types,
       tags: filters.tags,
+      ignoreCategory: true,
     );
     notifyListeners();
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:iconly/iconly.dart';
 
+import '../../core/localization/app_localizations.dart';
 import '../../core/widgets/skeleton_loader.dart';
 import '../../models/hotel.dart';
 
@@ -13,6 +14,8 @@ class HotelCardWidget extends StatelessWidget {
     required this.onAiInfo,
     required this.onToggleCompare,
     required this.isInComparison,
+    required this.onToggleFavorite,
+    required this.isFavorite,
   });
 
   final Hotel hotel;
@@ -20,9 +23,12 @@ class HotelCardWidget extends StatelessWidget {
   final VoidCallback onAiInfo;
   final VoidCallback onToggleCompare;
   final bool isInComparison;
+  final VoidCallback onToggleFavorite;
+  final bool isFavorite;
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Material(
@@ -75,10 +81,14 @@ class HotelCardWidget extends StatelessWidget {
                             onPressed: onToggleCompare,
                             icon: Icon(isInComparison ? IconlyBold.shield_done : IconlyLight.shield_done),
                           ),
+                          IconButton(
+                            onPressed: onToggleFavorite,
+                            icon: Icon(isFavorite ? IconlyBold.heart : IconlyLight.heart),
+                          ),
                           const Spacer(),
                           ElevatedButton(
                             onPressed: onTap,
-                            child: const Text('View'),
+                            child: Text(t.translate('view')),
                           )
                         ],
                       )

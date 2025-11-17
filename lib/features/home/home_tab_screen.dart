@@ -85,6 +85,8 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                     onAiInfo: () => _showAiInfo(context),
                     onToggleCompare: () => widget.comparisonController.toggleHotel(hotel),
                     isInComparison: widget.comparisonController.contains(hotel),
+                    onToggleFavorite: () => widget.hotelsController.toggleFavorite(hotel),
+                    isFavorite: widget.hotelsController.isFavorite(hotel),
                   )).toList(),
               if (widget.hotelsController.isLoadingMore)
                 const Padding(

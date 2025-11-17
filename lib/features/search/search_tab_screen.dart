@@ -9,6 +9,7 @@ import '../../core/widgets/skeleton_loader.dart';
 import '../comparison/comparison_screen.dart';
 import '../home/hotel_card_widget.dart';
 import '../hotel_detail/hotel_detail_screen.dart';
+import 'catalog_screen.dart';
 import 'filters_bottom_sheet.dart';
 
 class SearchTabScreen extends StatelessWidget {
@@ -105,6 +106,24 @@ class SearchTabScreen extends StatelessWidget {
                 ),
               ),
               SectionHeader(title: t.translate('catalog')),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => CatalogScreen(
+                          hotelsController: hotelsController,
+                          searchController: searchController,
+                        ),
+                      ),
+                    ),
+                    icon: const Icon(Icons.dashboard_customize_outlined),
+                    label: Text(t.translate('open_catalog')),
+                  ),
+                ),
+              ),
               SizedBox(
                 height: 44,
                 child: ListView(
@@ -142,6 +161,8 @@ class SearchTabScreen extends StatelessWidget {
                     onAiInfo: () => _showAiInfo(context),
                     onToggleCompare: () => comparisonController.toggleHotel(hotel),
                     isInComparison: comparisonController.contains(hotel),
+                    onToggleFavorite: () => hotelsController.toggleFavorite(hotel),
+                    isFavorite: hotelsController.isFavorite(hotel),
                   )),
               if (hotelsController.isLoadingMore)
                 const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()))
@@ -149,7 +170,10 @@ class SearchTabScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: OutlinedButton(
-                    onPressed: () => hotelsController.loadMore(query: searchController.queryController.text),
+                    onPressed: () => hotelsController.loadMore(
+                      query: searchController.queryController.text,
+                      ignoreCategory: true,
+                    ),
                     child: Text(t.translate('load_more')),
                   ),
                 ),

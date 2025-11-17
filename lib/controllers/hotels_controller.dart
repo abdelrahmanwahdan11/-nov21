@@ -22,8 +22,10 @@ class HotelsController extends ChangeNotifier {
   final int _perPage = 6;
   String category = 'Premium';
   HotelSort _sort = HotelSort.recommended;
+  final Set<String> _favorites = {};
 
   List<Hotel> get comparison => List.unmodifiable(_comparison);
+  List<Hotel> get allHotels => List.unmodifiable(_allHotels);
 
   Future<void> refresh() async {
     isLoading = true;
@@ -42,9 +44,17 @@ class HotelsController extends ChangeNotifier {
     applyFilters();
   }
 
-  void applyFilters({String query = '', double? maxPrice, double? minRating, double? maxDistance, List<String>? types, List<String>? tags}) {
+  void applyFilters({
+    String query = '',
+    double? maxPrice,
+    double? minRating,
+    double? maxDistance,
+    List<String>? types,
+    List<String>? tags,
+    bool ignoreCategory = false,
+  }) {
     Iterable<Hotel> filtered = _allHotels;
-    if (category.isNotEmpty) {
+    if (category.isNotEmpty && !ignoreCategory) {
       filtered = filtered.where((h) => h.type == category);
     }
     if (query.isNotEmpty) {
@@ -85,13 +95,13 @@ class HotelsController extends ChangeNotifier {
     hotelsNotifier.value = sorted.take(_page * _perPage).toList();
   }
 
-  Future<void> loadMore({String query = ''}) async {
+  Future<void> loadMore({String query = '', bool ignoreCategory = false}) async {
     if (isLoadingMore) return;
     isLoadingMore = true;
     notifyListeners();
     await Future.delayed(const Duration(milliseconds: 700));
     _page += 1;
-    applyFilters(query: query);
+    applyFilters(query: query, ignoreCategory: ignoreCategory);
     isLoadingMore = false;
     notifyListeners();
   }
@@ -112,4 +122,15 @@ class HotelsController extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  void toggleFavorite(Hotel hotel) {
+    if (_favorites.contains(hotel.id)) {
+      _favorites.remove(hotel.id);
+    } else {
+      _favorites.add(hotel.id);
+    }
+    notifyListeners();
+  }
+
+  bool isFavorite(Hotel hotel) => _favorites.contains(hotel.id);
 }
