@@ -1,59 +1,28 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-
 import '../../core/localization/app_localizations.dart';
-
-class OnboardingPageModel {
-  const OnboardingPageModel({required this.title, required this.body, required this.image});
-
-  final String title;
-  final String body;
-  final String image;
-}
+import '../../core/widgets/primary_button.dart';
 
 class OnboardingStoryScreen extends StatefulWidget {
   const OnboardingStoryScreen({super.key, required this.onFinish});
 
-  final Future<void> Function() onFinish;
+  final VoidCallback onFinish;
 
   @override
   State<OnboardingStoryScreen> createState() => _OnboardingStoryScreenState();
 }
 
 class _OnboardingStoryScreenState extends State<OnboardingStoryScreen> {
-  late final PageController _controller;
+  final PageController _controller = PageController();
   int _index = 0;
   Timer? _timer;
-
-  List<OnboardingPageModel> _pages(BuildContext context) => [
-        const OnboardingPageModel(
-          title: 'Curated stays',
-          body: 'Discover hotels with earthy palettes, botanical lobbies and AI powered itineraries.',
-          image: 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef',
-        ),
-        const OnboardingPageModel(
-          title: 'Live comparisons',
-          body: 'Compare suites, rewards, price trends and hidden perks instantly.',
-          image: 'https://images.unsplash.com/photo-1508921912186-1d1a45ebb3c1',
-        ),
-        const OnboardingPageModel(
-          title: 'AI travel companion',
-          body: 'Chat with Roamify to craft bespoke journeys infused with local culture.',
-          image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
-        ),
-      ];
 
   @override
   void initState() {
     super.initState();
-    _controller = PageController();
-    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      final pages = _pages(context);
-      if (_index < pages.length - 1) {
-        _index++;
-        _controller.animateToPage(_index, duration: 400.ms, curve: Curves.easeOut);
+    _timer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (_index < 2) {
+        _controller.nextPage(duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
       }
     });
   }
@@ -67,109 +36,114 @@ class _OnboardingStoryScreenState extends State<OnboardingStoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context);
-    final pages = _pages(context);
+    final t = Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+    final pages = [
+      _OnboardingPage(
+        title: t.translate('welcome'),
+        description: 'Discover immersive stays with AI guidance.',
+        image: 'https://images.unsplash.com/photo-1501117716987-c8e1ecb210af',
+      ),
+      _OnboardingPage(
+        title: 'Compare & book',
+        description: 'Check prices, amenities and book locally.',
+        image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf',
+      ),
+      _OnboardingPage(
+        title: 'Chat with Roamify',
+        description: 'Ask the bot for tailored picks.',
+        image: 'https://images.unsplash.com/photo-1501119990246-6c8744b3205e',
+      ),
+    ];
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () async {
-                  await widget.onFinish();
-                },
-                child: Text(t.translate('skip')),
-              ),
-            ),
             Expanded(
               child: PageView.builder(
                 controller: _controller,
-                onPageChanged: (value) => setState(() => _index = value),
+                onPageChanged: (i) => setState(() => _index = i),
                 itemCount: pages.length,
-                itemBuilder: (context, index) {
-                  final page = pages[index];
-                  return Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(32),
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Image.network(page.image, fit: BoxFit.cover),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [Colors.black.withOpacity(0.3), Colors.transparent],
-                                      begin: Alignment.bottomCenter,
-                                      end: Alignment.topCenter,
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          page.title,
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-                        ).animate().fadeIn(duration: 500.ms).slide(begin: const Offset(0, 0.2)),
-                        const SizedBox(height: 12),
-                        Text(
-                          page.body,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                itemBuilder: (_, i) => pages[i],
               ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                pages.length,
-                (i) => AnimatedContainer(
-                  duration: 300.ms,
-                  width: _index == i ? 32 : 8,
-                  height: 8,
+              children: List.generate(pages.length, (i) {
+                final active = i == _index;
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
                   margin: const EdgeInsets.all(4),
+                  width: active ? 18 : 8,
+                  height: 8,
                   decoration: BoxDecoration(
-                    color: _index == i ? Theme.of(context).colorScheme.primary : Colors.grey.shade400,
-                    borderRadius: BorderRadius.circular(32),
+                    color: active ? Theme.of(context).primaryColor : Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-              ),
+                );
+              }),
             ),
             Padding(
-              padding: const EdgeInsets.all(24),
-              child: Row(
+              padding: const EdgeInsets.all(24.0),
+              child: PrimaryButton(
+                text: _index == pages.length - 1 ? 'Get started' : 'Next',
+                onPressed: () {
+                  if (_index == pages.length - 1) {
+                    widget.onFinish();
+                  } else {
+                    _controller.nextPage(duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OnboardingPage extends StatelessWidget {
+  const _OnboardingPage({required this.title, required this.description, required this.image});
+  final String title;
+  final String description;
+  final String image;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(32),
+              child: Stack(
+                fit: StackFit.expand,
                 children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => _controller.nextPage(duration: 400.ms, curve: Curves.easeOut),
-                      child: Text(t.translate('next')),
+                  Image.network(image, fit: BoxFit.cover),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.black.withOpacity(0.1), Colors.black.withOpacity(0.5)],
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        await widget.onFinish();
-                      },
-                      child: Text(t.translate('get_started')),
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white)),
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 20),
+          Text(description, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
+        ],
       ),
     );
   }

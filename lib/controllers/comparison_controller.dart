@@ -1,20 +1,15 @@
-import 'package:flutter/material.dart';
-
+import 'package:flutter/foundation.dart';
 import '../models/hotel.dart';
 
 class ComparisonController extends ChangeNotifier {
-  final List<Hotel> _selected = [];
+  final List<Hotel> selected = [];
 
-  List<Hotel> get selected => List.unmodifiable(_selected);
-
-  void toggleHotel(Hotel hotel) {
-    if (_selected.any((h) => h.id == hotel.id)) {
-      _selected.removeWhere((h) => h.id == hotel.id);
-    } else if (_selected.length < 4) {
-      _selected.add(hotel);
+  void toggle(Hotel hotel) {
+    if (selected.any((h) => h.id == hotel.id)) {
+      selected.removeWhere((h) => h.id == hotel.id);
+    } else if (selected.length < 4) {
+      selected.add(hotel);
     }
     notifyListeners();
   }
-
-  bool contains(Hotel hotel) => _selected.any((h) => h.id == hotel.id);
 }

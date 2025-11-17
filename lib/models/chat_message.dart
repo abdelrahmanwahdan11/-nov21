@@ -1,15 +1,8 @@
-enum SenderType { user, bot }
+enum MessageSender { user, bot }
 
 class ChatMessage {
-  const ChatMessage({
-    required this.id,
-    required this.text,
-    required this.sentAt,
-    required this.sender,
-  });
+  ChatMessage({required this.sender, required this.text});
 
-  final String id;
+  final MessageSender sender;
   final String text;
-  final DateTime sentAt;
-  final SenderType sender;
 }

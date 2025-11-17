@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 
-/// Model describing a hotel entry in the catalog.
 class Hotel {
-  const Hotel({
+  Hotel({
     required this.id,
     required this.name,
     required this.city,
     required this.price,
     required this.rating,
-    required this.distance,
+    required this.distanceKm,
     required this.tags,
-    required this.type,
     required this.image,
-    required this.description,
-    required this.amenities,
-    required this.reviews,
+    this.description = '',
+    this.amenities = const [],
   });
 
   final String id;
@@ -22,13 +19,11 @@ class Hotel {
   final String city;
   final double price;
   final double rating;
-  final double distance;
+  final double distanceKm;
   final List<String> tags;
-  final String type;
   final String image;
   final String description;
   final List<String> amenities;
-  final int reviews;
 
-  Color dynamicTagColor(Color primary) => primary.withOpacity(0.12);
+  Color heroColor(Color primary) => primary.withOpacity(0.15);
 }

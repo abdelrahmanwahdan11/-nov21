@@ -1,212 +1,167 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:iconly/iconly.dart';
-
 import '../../controllers/bookings_controller.dart';
 import '../../controllers/comparison_controller.dart';
 import '../../controllers/hotels_controller.dart';
 import '../../core/localization/app_localizations.dart';
+import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/section_header.dart';
 import '../../core/widgets/skeleton_loader.dart';
+import '../../models/booking.dart';
 import '../../models/hotel.dart';
-import '../comparison/comparison_screen.dart';
 import '../hotel_detail/hotel_detail_screen.dart';
-import 'hotel_card_widget.dart';
-import 'featured_3d_carousel_widget.dart';
 
-class HomeTabScreen extends StatefulWidget {
-  const HomeTabScreen({
-    super.key,
-    required this.hotelsController,
-    required this.comparisonController,
-    required this.bookingsController,
-  });
+class HomeTabScreen extends StatelessWidget {
+  const HomeTabScreen({super.key, required this.hotelsController, required this.comparisonController, required this.bookingsController});
 
   final HotelsController hotelsController;
   final ComparisonController comparisonController;
   final BookingsController bookingsController;
 
   @override
-  State<HomeTabScreen> createState() => _HomeTabScreenState();
+  Widget build(BuildContext context) {
+    final t = Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+    return AnimatedBuilder(
+      animation: hotelsController,
+      builder: (context, _) {
+        bookingsController.seedHotels(hotelsController.visible);
+        final hotels = hotelsController.visible;
+        return RefreshIndicator(
+          onRefresh: hotelsController.refresh,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              SectionHeader(title: t.translate('welcome'), action: const Icon(IconlyLight.location)),
+              const SizedBox(height: 12),
+              _FeaturedCarousel(items: hotels),
+              const SizedBox(height: 24),
+              SectionHeader(title: 'Popular stays', action: Text(t.translate('favorites'))),
+              const SizedBox(height: 12),
+              ...hotels.map((h) => _HotelCard(
+                    hotel: h,
+                    onFavorite: () => hotelsController.toggleFavorite(h.id),
+                    onCompare: () => comparisonController.toggle(h),
+                    onBook: () {
+                      bookingsController.addBooking(
+                        Booking(id: DateTime.now().toIso8601String(), hotel: h, date: DateTime.now().add(const Duration(days: 2)), nights: 2, guests: 2),
+                      );
+                    },
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => HotelDetailScreen(hotel: h)),
+                    ),
+                  )),
+              if (hotelsController.isLoadingMore) ...List.generate(2, (_) => const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: SkeletonLoader(height: 120))),
+              TextButton(onPressed: hotelsController.loadMore, child: const Text('Load more')),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
-class _HomeTabScreenState extends State<HomeTabScreen> {
-  final categories = const ['Premium', 'Essential', 'Luxury', 'Suites'];
+class _FeaturedCarousel extends StatelessWidget {
+  const _FeaturedCarousel({required this.items});
+  final List<Hotel> items;
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: widget.hotelsController.refresh,
-      child: AnimatedBuilder(
-        animation: Listenable.merge([widget.hotelsController, widget.hotelsController.hotelsNotifier]),
-        builder: (context, _) {
-          final hotels = widget.hotelsController.hotelsNotifier.value;
-          if (widget.hotelsController.isLoading) {
-            return RefreshIndicator(
-              onRefresh: widget.hotelsController.refresh,
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: 4,
-                itemBuilder: (_, __) => const SkeletonLoader(height: 140),
+    return SizedBox(
+      height: 220,
+      child: PageView.builder(
+        controller: PageController(viewportFraction: 0.8),
+        itemCount: items.length,
+        itemBuilder: (_, i) {
+          final hotel = items[i];
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              image: DecorationImage(image: NetworkImage(hotel.image), fit: BoxFit.cover),
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                gradient: LinearGradient(colors: [Colors.black.withOpacity(0.2), Colors.black.withOpacity(0.6)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
               ),
-            );
-          }
-          return ListView(
-            padding: const EdgeInsets.only(bottom: 120),
-            physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+              padding: const EdgeInsets.all(16),
+              alignment: Alignment.bottomLeft,
+              child: Text(hotel.name, style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white)),
+            ),
+          ).animate().slide();
+        },
+      ),
+    );
+  }
+}
+
+class _HotelCard extends StatelessWidget {
+  const _HotelCard({required this.hotel, required this.onFavorite, required this.onCompare, required this.onBook, required this.onTap});
+
+  final Hotel hotel;
+  final VoidCallback onFavorite;
+  final VoidCallback onCompare;
+  final VoidCallback onBook;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(context),
-              Featured3DCarousel(hotels: hotels.take(5).toList()),
-              const SizedBox(height: 12),
-              _buildCategoryChips(context),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: SizedBox(
-                  height: 140,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    children: [
-                      _OfferCard(title: 'Stay 3, get spa credits'),
-                      _OfferCard(title: 'Members save 15% midweek'),
-                    ],
+              Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.network(hotel.image, height: 90, width: 90, fit: BoxFit.cover),
                   ),
-                ),
-              ),
-              SectionHeader(
-                title: AppLocalizations.of(context).translate('home'),
-                actionLabel: AppLocalizations.of(context).translate('compare'),
-                onAction: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ComparisonScreen(controller: widget.comparisonController),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(hotel.name, style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 4),
+                        Text('${hotel.city} • ${hotel.distanceKm.toStringAsFixed(1)} km'),
+                        Text('\$${hotel.price.toStringAsFixed(0)} / night'),
+                      ],
                     ),
-                  );
-                },
+                  ),
+                  IconButton(onPressed: onFavorite, icon: const Icon(IconlyLight.heart)),
+                ],
               ),
-              ...hotels.map((hotel) => HotelCardWidget(
-                    hotel: hotel,
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => HotelDetailScreen(
-                          hotel: hotel,
-                          bookingsController: widget.bookingsController,
-                        ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  PrimaryButton(text: t.translate('book_now'), onPressed: onBook),
+                  const SizedBox(width: 12),
+                  OutlinedButton(onPressed: onCompare, child: const Text('Compare')),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => showModalBottomSheet(
+                      context: context,
+                      builder: (_) => Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Text(t.translate('ai_info')),
                       ),
                     ),
-                    onAiInfo: () => _showAiInfo(context),
-                    onToggleCompare: () => widget.comparisonController.toggleHotel(hotel),
-                    isInComparison: widget.comparisonController.contains(hotel),
-                    onToggleFavorite: () => widget.hotelsController.toggleFavorite(hotel),
-                    isFavorite: widget.hotelsController.isFavorite(hotel),
-                  )).toList(),
-              if (widget.hotelsController.isLoadingMore)
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: CircularProgressIndicator(),
-                )
-              else
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: OutlinedButton(
-                    onPressed: widget.hotelsController.loadMore,
-                    child: Text(AppLocalizations.of(context).translate('load_more')),
+                    icon: const Icon(IconlyLight.info_circle),
                   ),
-                ),
+                ],
+              ),
             ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return ListTile(
-      leading: const CircleAvatar(
-        backgroundImage: NetworkImage('https://images.unsplash.com/photo-1500648767791-00dcc994a43e'),
-        radius: 28,
-      ),
-      title: Text(
-        'Dubai',
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-      ),
-      subtitle: const Text('Curated by Roamify AI'),
-      trailing: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Image.network(
-          'https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba',
-          width: 90,
-          height: 70,
-          fit: BoxFit.cover,
+          ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildCategoryChips(BuildContext context) {
-    return SizedBox(
-      height: 56,
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          final active = widget.hotelsController.category == category;
-          return ChoiceChip(
-            label: Text(category),
-            selected: active,
-            onSelected: (_) => setState(() => widget.hotelsController.updateCategory(category)),
-            selectedColor: Theme.of(context).colorScheme.primary.withOpacity(.2),
-          );
-        },
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemCount: categories.length,
-      ),
-    );
-  }
-
-  void _showAiInfo(BuildContext context) {
-    final t = AppLocalizations.of(context);
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(IconlyBold.info_square, size: 48),
-            const SizedBox(height: 16),
-            Text(t.translate('ai_info')),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _OfferCard extends StatelessWidget {
-  const _OfferCard({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 220,
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.secondary.withOpacity(.2),
-        borderRadius: BorderRadius.circular(28),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Roamify Rewards', style: Theme.of(context).textTheme.labelSmall),
-          const Spacer(),
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-        ],
       ),
     );
   }

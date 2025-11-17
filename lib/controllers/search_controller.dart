@@ -1,66 +1,45 @@
-import 'package:flutter/material.dart';
-
+import 'package:flutter/foundation.dart';
+import '../models/hotel.dart';
 import 'hotels_controller.dart';
 
-class SearchFilters {
-  SearchFilters({
-    this.maxPrice,
-    this.minRating,
-    this.maxDistance,
-    this.types = const [],
-    this.tags = const [],
-  });
-
-  final double? maxPrice;
-  final double? minRating;
-  final double? maxDistance;
-  final List<String> types;
-  final List<String> tags;
-
-  SearchFilters copyWith({
-    double? maxPrice,
-    double? minRating,
-    double? maxDistance,
-    List<String>? types,
-    List<String>? tags,
-  }) {
-    return SearchFilters(
-      maxPrice: maxPrice ?? this.maxPrice,
-      minRating: minRating ?? this.minRating,
-      maxDistance: maxDistance ?? this.maxDistance,
-      types: types ?? this.types,
-      tags: tags ?? this.tags,
-    );
-  }
-}
+enum SortOption { price, rating, distance }
 
 class SearchController extends ChangeNotifier {
-  SearchController(this._hotelsController);
+  SearchController(this.hotelsController);
 
-  final HotelsController _hotelsController;
-  final TextEditingController queryController = TextEditingController();
-  SearchFilters filters = SearchFilters();
+  final HotelsController hotelsController;
+  String query = '';
+  List<String> tags = [];
+  SortOption sortOption = SortOption.price;
+
+  List<Hotel> get results {
+    final filtered = hotelsController.filter(query: query, tags: tags);
+    filtered.sort((a, b) {
+      switch (sortOption) {
+        case SortOption.rating:
+          return b.rating.compareTo(a.rating);
+        case SortOption.distance:
+          return a.distanceKm.compareTo(b.distanceKm);
+        case SortOption.price:
+        default:
+          return a.price.compareTo(b.price);
+      }
+    });
+    return filtered;
+  }
 
   void updateQuery(String value) {
-    _hotelsController.applyFilters(
-      query: value,
-      maxPrice: filters.maxPrice,
-      minRating: filters.minRating,
-      maxDistance: filters.maxDistance,
-      types: filters.types,
-      tags: filters.tags,
-      ignoreCategory: true,
-    );
+    query = value;
     notifyListeners();
   }
 
-  void updateFilters(SearchFilters newFilters) {
-    filters = newFilters;
-    updateQuery(queryController.text);
+  void updateTags(List<String> value) {
+    tags = value;
+    notifyListeners();
   }
 
-  void resetFilters() {
-    filters = SearchFilters();
-    updateQuery(queryController.text);
+  void updateSort(SortOption option) {
+    sortOption = option;
+    notifyListeners();
   }
 }

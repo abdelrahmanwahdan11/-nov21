@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-
 import '../../controllers/auth_controller.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/widgets/primary_button.dart';
-import 'forgot_password_screen.dart';
 import 'register_screen.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.authController});
@@ -17,86 +15,62 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _email = TextEditingController();
+  final _password = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _loading = false;
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context);
+    final t = Localizations.of<AppLocalizations>(context, AppLocalizations)!;
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  t.translate('login'),
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-                ).animate().fadeIn(duration: 500.ms).slide(begin: const Offset(0, 0.2)),
-                const SizedBox(height: 32),
+                Text(t.translate('welcome'), style: Theme.of(context).textTheme.headlineSmall),
+                const SizedBox(height: 24),
                 TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(labelText: t.translate('email_phone')),
-                  validator: (value) => value == null || value.isEmpty ? t.translate('required') : null,
+                  controller: _email,
+                  decoration: InputDecoration(labelText: t.translate('email')),
+                  validator: (v) => (v ?? '').contains('@') ? null : 'Enter email',
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 TextFormField(
-                  controller: _passwordController,
-                  decoration: InputDecoration(labelText: t.translate('password')),
+                  controller: _password,
                   obscureText: true,
-                  validator: (value) => value != null && value.length >= 6 ? null : t.translate('min_chars'),
+                  decoration: InputDecoration(labelText: t.translate('password')),
+                  validator: (v) => (v ?? '').length > 3 ? null : 'Too short',
                 ),
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
-                      );
-                    },
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                    ),
                     child: Text(t.translate('forgot_password')),
                   ),
                 ),
                 const SizedBox(height: 16),
                 PrimaryButton(
-                  label: t.translate('login'),
-                  onPressed: _loading
-                      ? () {}
-                      : () async {
-                          if (!_formKey.currentState!.validate()) return;
-                          setState(() => _loading = true);
-                          await widget.authController.login(
-                            _emailController.text,
-                            _passwordController.text,
-                          );
-                          if (mounted) setState(() => _loading = false);
-                        },
+                  text: t.translate('login'),
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      await widget.authController.login(_email.text, _password.text);
+                    }
+                  },
                 ),
-                const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: () => widget.authController.login('guest@roamify.app', 'guest'),
-                  child: Text(t.translate('guest_login')),
+                TextButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                  ),
+                  child: const Text('Create account'),
                 ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(t.translate('register')),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => RegisterScreen(authController: widget.authController),
-                        ),
-                      ),
-                      child: Text(t.translate('get_started')),
-                    )
-                  ],
-                )
               ],
             ),
           ),

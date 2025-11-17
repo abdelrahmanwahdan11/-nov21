@@ -1,99 +1,71 @@
 import 'package:flutter/material.dart';
-
 import '../../controllers/bookings_controller.dart';
-import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
-import '../../models/reward.dart';
-import 'my_trips_screen.dart';
-import 'booking_history_widget.dart';
-import 'reward_options_screen.dart';
 
 class RewardsProfileTabScreen extends StatelessWidget {
-  RewardsProfileTabScreen({super.key, required this.bookingsController});
-
-  final List<Reward> rewards = generateRewards();
+  const RewardsProfileTabScreen({super.key, required this.bookingsController});
   final BookingsController bookingsController;
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context);
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: [
-        _buildPointsCard(context),
-        const SizedBox(height: 16),
-        _buildMilestoneCard(context),
-        const SizedBox(height: 12),
-        ElevatedButton(
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => RewardOptionsScreen()),
+    final rewards = buildDummyRewards();
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Rewards', style: Theme.of(context).textTheme.headlineSmall),
+              const SizedBox(height: 12),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Points balance'),
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(value: 0.4, minHeight: 10, borderRadius: BorderRadius.circular(12)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text('Upcoming trips', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Expanded(
+                child: AnimatedBuilder(
+                  animation: bookingsController,
+                  builder: (_, __) => ListView(
+                    children: [
+                      ...bookingsController.upcoming.map((b) => ListTile(title: Text(b.hotel.name), subtitle: Text('${b.nights} nights'))),
+                      const SizedBox(height: 12),
+                      const Text('Past'),
+                      ...bookingsController.past.map((b) => ListTile(title: Text(b.hotel.name), subtitle: Text('Completed'))),
+                    ],
+                  ),
+                ),
+              ),
+              Text('Reward options', style: Theme.of(context).textTheme.titleMedium),
+              SizedBox(
+                height: 120,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: rewards
+                      .map((r) => Container(
+                            width: 160,
+                            margin: const EdgeInsets.only(right: 12),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(16)),
+                            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(r.title), Text('${r.points} pts')]),
+                          ))
+                      .toList(),
+                ),
+              ),
+            ],
           ),
-          child: Text(t.translate('see_rewards')),
         ),
-        const SizedBox(height: 24),
-        Text(t.translate('rewards_section'), style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 12),
-        ...rewards.map((reward) => ListTile(
-              title: Text(reward.title),
-              subtitle: Text(reward.description),
-              trailing: Text('${reward.points} pts'),
-            )),
-        const SizedBox(height: 24),
-        ElevatedButton.icon(
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => MyTripsScreen(bookingsController: bookingsController),
-            ),
-          ),
-          icon: const Icon(Icons.event_available_outlined),
-          label: Text(t.translate('my_bookings')),
-        ),
-        const SizedBox(height: 12),
-        Text(t.translate('booking_history'), style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        BookingHistoryWidget(bookingsController: bookingsController),
-      ],
-    );
-  }
-
-  Widget _buildPointsCard(BuildContext context) {
-    final t = AppLocalizations.of(context);
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
-        borderRadius: BorderRadius.circular(28),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(t.translate('club_member'), style: const TextStyle(color: Colors.white60)),
-          const SizedBox(height: 12),
-          const Text('24,800 pts', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMilestoneCard(BuildContext context) {
-    final t = AppLocalizations.of(context);
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(28),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(t.translate('milestone_title')),
-          const SizedBox(height: 12),
-          LinearProgressIndicator(
-            value: 0.65,
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(12),
-          )
-        ],
       ),
     );
   }

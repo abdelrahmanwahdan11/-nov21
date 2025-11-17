@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
-
 import '../localization/app_localizations.dart';
 
 class RoamifyTabBar extends StatelessWidget {
@@ -10,48 +9,42 @@ class RoamifyTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final labels = [
-      AppLocalizations.of(context).translate('home'),
-      AppLocalizations.of(context).translate('search'),
-      AppLocalizations.of(context).translate('ai'),
-      AppLocalizations.of(context).translate('rewards'),
-      AppLocalizations.of(context).translate('settings'),
-    ];
-    final icons = const [
-      IconlyBold.home,
-      IconlyBold.search,
-      IconlyBold.chat,
-      IconlyBold.ticket_star,
-      IconlyBold.setting,
-    ];
+    final t = Localizations.of<AppLocalizations>(context, AppLocalizations)!;
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: theme.cardColor.withOpacity(.9),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(32),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: TabBar(
         controller: controller,
-        indicator: BoxDecoration(
-          color: theme.colorScheme.primary.withOpacity(.12),
-          borderRadius: BorderRadius.circular(24),
-        ),
-        indicatorSize: TabBarIndicatorSize.tab,
-        labelColor: theme.colorScheme.primary,
-        unselectedLabelColor: theme.textTheme.bodyMedium?.color?.withOpacity(.6),
-        tabs: List.generate(5, (index) {
-          return Tab(
-            iconMargin: const EdgeInsets.only(bottom: 2),
-            icon: Icon(icons[index]),
-            child: Text(
-              labels[index],
-              style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
-            ),
-          );
-        }),
+        indicator: BoxDecoration(color: Theme.of(context).primaryColor.withOpacity(0.12), borderRadius: BorderRadius.circular(24)),
+        labelColor: Theme.of(context).primaryColor,
+        unselectedLabelColor: Theme.of(context).textTheme.bodyMedium?.color,
+        tabs: [
+          _Tab(icon: IconlyBold.home, label: t.translate('home')),
+          _Tab(icon: IconlyBold.search, label: t.translate('search')),
+          _Tab(icon: IconlyBold.chat, label: t.translate('ai')),
+          _Tab(icon: IconlyBold.ticket_star, label: t.translate('rewards')),
+          _Tab(icon: IconlyBold.setting, label: t.translate('settings')),
+        ],
       ),
+    );
+  }
+}
+
+class _Tab extends StatelessWidget {
+  const _Tab({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tab(
+      icon: Icon(icon),
+      text: label,
     );
   }
 }

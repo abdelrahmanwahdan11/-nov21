@@ -1,103 +1,84 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
-
 import '../../models/hotel.dart';
 
 class HotelImageOverlayWidget extends StatefulWidget {
-  const HotelImageOverlayWidget({super.key, required this.hotel, required this.onClose});
-
+  const HotelImageOverlayWidget({super.key, required this.hotel});
   final Hotel hotel;
-  final VoidCallback onClose;
 
   @override
   State<HotelImageOverlayWidget> createState() => _HotelImageOverlayWidgetState();
 }
 
 class _HotelImageOverlayWidgetState extends State<HotelImageOverlayWidget> {
-  bool _flipped = false;
+  bool flipped = false;
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: Stack(
-        children: [
-          GestureDetector(
-            onTap: widget.onClose,
-            onVerticalDragEnd: (_) => widget.onClose(),
-            child: Container(color: Colors.black54),
-          ),
-          Center(
-            child: GestureDetector(
-              onTap: () => setState(() => _flipped = !_flipped),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 500),
-                transitionBuilder: (child, animation) {
-                  final rotate = Tween(begin: _flipped ? -1.0 : 1.0, end: 0.0).animate(animation);
-                  return AnimatedBuilder(
-                    animation: rotate,
-                    child: child,
-                    builder: (context, child) {
-                      final angle = rotate.value * 3.1416;
-                      return Transform(
-                        transform: Matrix4.identity()
-                          ..setEntry(3, 2, 0.001)
-                          ..rotateY(angle),
-                        alignment: Alignment.center,
-                        child: child,
-                      );
-                    },
-                  );
-                },
-                child: _flipped ? _buildBack(context) : _buildFront(context),
+    return GestureDetector(
+      onTap: () => setState(() => flipped = !flipped),
+      child: Scaffold(
+        backgroundColor: Colors.black.withOpacity(0.8),
+        body: Center(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            transitionBuilder: (child, anim) => AnimatedBuilder(
+              animation: anim,
+              builder: (_, __) => Transform(
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.001)
+                  ..rotateY(pi * anim.value),
+                alignment: Alignment.center,
+                child: child,
               ),
             ),
+            child: flipped
+                ? _BackCard(key: const ValueKey('back'), hotel: widget.hotel)
+                : _FrontCard(key: const ValueKey('front'), hotel: widget.hotel),
           ),
-        ],
+        ),
       ),
     );
   }
+}
 
-  Widget _buildFront(BuildContext context) {
+class _FrontCard extends StatelessWidget {
+  const _FrontCard({super.key, required this.hotel});
+  final Hotel hotel;
+
+  @override
+  Widget build(BuildContext context) {
     return ClipRRect(
-      key: const ValueKey('front'),
-      borderRadius: BorderRadius.circular(32),
+      borderRadius: BorderRadius.circular(24),
       child: Stack(
         children: [
-          Image.network(widget.hotel.image, width: MediaQuery.of(context).size.width * 0.8, fit: BoxFit.cover),
-          Positioned(
-            left: 24,
-            bottom: 24,
-            right: 24,
-            child: Text(
-              widget.hotel.name,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white),
-            ),
-          ),
+          Image.network(hotel.image, height: 320, width: 320, fit: BoxFit.cover),
+          Positioned(bottom: 12, left: 12, child: Text(hotel.name, style: const TextStyle(color: Colors.white, fontSize: 20))),
         ],
       ),
     );
   }
+}
 
-  Widget _buildBack(BuildContext context) {
+class _BackCard extends StatelessWidget {
+  const _BackCard({super.key, required this.hotel});
+  final Hotel hotel;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      key: const ValueKey('back'),
-      width: MediaQuery.of(context).size.width * 0.8,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(32),
-      ),
+      width: 320,
+      height: 320,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(24)),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Highlights', style: Theme.of(context).textTheme.titleLarge),
+          Text('About ${hotel.name}', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 12),
-          ...widget.hotel.amenities.map((a) => ListTile(
-                dense: true,
-                leading: const Icon(Icons.check_circle_outline),
-                title: Text(a),
-              )),
-          const SizedBox(height: 12),
-          TextButton(onPressed: widget.onClose, child: const Text('Close')),
+          Text(hotel.description),
+          const Spacer(),
+          Text('Amenities: ${hotel.amenities.join(', ')}'),
         ],
       ),
     );

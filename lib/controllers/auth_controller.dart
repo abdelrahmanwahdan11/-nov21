@@ -1,47 +1,41 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../models/user.dart';
 
 class AuthController extends ChangeNotifier {
   AuthController(this._prefs);
 
   final SharedPreferences _prefs;
-  static const _loggedKey = 'logged_in';
-  static const _onboardingKey = 'seen_onboarding';
+  static const _keyOnboarding = 'has_seen_onboarding';
+  static const _keyLoggedIn = 'is_logged_in';
 
-  bool _loggedIn = false;
-  bool _seenOnboarding = false;
-  User? _currentUser;
+  bool _hasSeenOnboarding = false;
+  bool _isLoggedIn = false;
 
-  bool get isLoggedIn => _loggedIn;
-  bool get hasSeenOnboarding => _seenOnboarding;
-  User? get user => _currentUser;
+  bool get hasSeenOnboarding => _hasSeenOnboarding;
+  bool get isLoggedIn => _isLoggedIn;
 
   Future<void> load() async {
-    _loggedIn = _prefs.getBool(_loggedKey) ?? false;
-    _seenOnboarding = _prefs.getBool(_onboardingKey) ?? false;
+    _hasSeenOnboarding = _prefs.getBool(_keyOnboarding) ?? false;
+    _isLoggedIn = _prefs.getBool(_keyLoggedIn) ?? false;
     notifyListeners();
   }
 
   Future<void> markOnboardingSeen() async {
-    _seenOnboarding = true;
-    await _prefs.setBool(_onboardingKey, true);
+    _hasSeenOnboarding = true;
+    await _prefs.setBool(_keyOnboarding, true);
     notifyListeners();
   }
 
-  Future<void> login(String email, String password) async {
-    await Future.delayed(const Duration(milliseconds: 800));
-    _loggedIn = true;
-    _currentUser = User(name: 'Roamifier', email: email, phone: '+9715000000');
-    await _prefs.setBool(_loggedKey, true);
+  Future<bool> login(String email, String password) async {
+    _isLoggedIn = email.isNotEmpty && password.isNotEmpty;
+    await _prefs.setBool(_keyLoggedIn, _isLoggedIn);
     notifyListeners();
+    return _isLoggedIn;
   }
 
   Future<void> logout() async {
-    _loggedIn = false;
-    _currentUser = null;
-    await _prefs.setBool(_loggedKey, false);
+    _isLoggedIn = false;
+    await _prefs.setBool(_keyLoggedIn, false);
     notifyListeners();
   }
 }

@@ -1,127 +1,68 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-
 import '../../models/booking.dart';
-import '../../models/chat_message.dart';
 import '../../models/hotel.dart';
 import '../../models/reward.dart';
 
-final _random = Random(42);
-
-List<Hotel> generateHotels() {
-  const images = [
-    'https://images.unsplash.com/photo-1501117716987-c8e1ecb210cc',
-    'https://images.unsplash.com/photo-1445019980597-93fa8acb246c',
-    'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
-    'https://images.unsplash.com/photo-1505693314120-0d443867891c',
-    'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb',
+List<Hotel> buildDummyHotels() {
+  return [
+    Hotel(
+      id: 'h1',
+      name: 'Palm Oasis Resort',
+      city: 'Dubai',
+      price: 220,
+      rating: 4.7,
+      distanceKm: 1.2,
+      tags: const ['luxury', 'beach', 'family'],
+      image: 'https://images.unsplash.com/photo-1501117716987-c8e1ecb210af',
+      description: 'Soothing beachfront escape with curated dining.',
+      amenities: const ['Pool', 'Spa', 'Gym', 'Wifi'],
+    ),
+    Hotel(
+      id: 'h2',
+      name: 'Desert Bloom Suites',
+      city: 'Abu Dhabi',
+      price: 140,
+      rating: 4.3,
+      distanceKm: 3.4,
+      tags: const ['business', 'urban'],
+      image: 'https://images.unsplash.com/photo-1501119990246-6c8744b3205e',
+      description: 'City retreat close to the promenade with skyline views.',
+      amenities: const ['Wifi', 'Parking', 'Lounge'],
+    ),
+    Hotel(
+      id: 'h3',
+      name: 'Olive Garden Hotel',
+      city: 'Amman',
+      price: 110,
+      rating: 4.0,
+      distanceKm: 2.6,
+      tags: const ['budget', 'boutique'],
+      image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf',
+      description: 'Calm urban boutique with leafy terraces.',
+      amenities: const ['Breakfast', 'Wifi'],
+    ),
   ];
-  final List<Hotel> hotels = [];
-  for (var i = 0; i < 25; i++) {
-    final price = 120 + _random.nextInt(200);
-    final rating = 3 + _random.nextDouble() * 2;
-    final distance = 0.5 + _random.nextDouble() * 8;
-    hotels.add(
-      Hotel(
-        id: 'hotel_$i',
-        name: 'Serenity ${i + 1}',
-        city: ['Dubai', 'Cairo', 'Riyadh', 'Beirut'][i % 4],
-        price: price.toDouble(),
-        rating: double.parse(rating.toStringAsFixed(1)),
-        distance: double.parse(distance.toStringAsFixed(1)),
-        tags: ['spa', 'family', 'business', 'beach', 'suites']..shuffle(),
-        type: ['Premium', 'Essential', 'Luxury', 'Suites'][i % 4],
-        image: images[i % images.length],
-        description:
-            'Thoughtfully curated spaces with calming earthy palettes, smart concierge and AI powered itineraries for every stay.',
-        amenities: const [
-          'Free breakfast',
-          'Wellness spa',
-          '24h concierge',
-          'Airport shuttle',
-          'Smart room service',
-        ],
-        reviews: 120 + _random.nextInt(600),
-      ),
-    );
-  }
-  return hotels;
 }
 
-List<Booking> generateBookings() => [
-      Booking(
-        id: 'book_1',
-        hotelName: 'Serenity Downtown',
-        city: 'Dubai',
-        checkIn: DateTime.now().add(const Duration(days: 4)),
-        nights: 3,
-        guests: 2,
-        price: 540,
-        status: BookingStatus.upcoming,
-      ),
-      Booking(
-        id: 'book_2',
-        hotelName: 'Serenity Marina',
-        city: 'Dubai',
-        checkIn: DateTime.now().add(const Duration(days: 12)),
-        nights: 2,
-        guests: 3,
-        price: 420,
-        status: BookingStatus.upcoming,
-      ),
-      Booking(
-        id: 'book_3',
-        hotelName: 'Serenity Oasis',
-        city: 'Cairo',
-        checkIn: DateTime.now().subtract(const Duration(days: 6)),
-        nights: 2,
-        guests: 2,
-        price: 360,
-        status: BookingStatus.completed,
-      ),
-      Booking(
-        id: 'book_4',
-        hotelName: 'Serenity Corniche',
-        city: 'Beirut',
-        checkIn: DateTime.now().subtract(const Duration(days: 16)),
-        nights: 4,
-        guests: 1,
-        price: 760,
-        status: BookingStatus.cancelled,
-      ),
-    ];
-
-List<Reward> generateRewards() => const [
-      Reward(
-        title: 'Spa escape',
-        description: '2 complimentary treatments in our partner resorts.',
-        points: 400,
-      ),
-      Reward(
-        title: 'Suite upgrade',
-        description: 'Upgrade to panoramic sky suites for one night.',
-        points: 800,
-      ),
-    ];
-
-List<ChatMessage> initialMessages() => const [
-      ChatMessage(
-        id: 'm1',
-        text: 'Hi! I am Roamify AI. Ready to design a soulful stay for you.',
-        sentAt: DateTime(2024, 1, 1, 12, 0),
-        sender: SenderType.bot,
-      ),
-      ChatMessage(
-        id: 'm2',
-        text: 'Ask me for premium picks or compare suites instantly.',
-        sentAt: DateTime(2024, 1, 1, 12, 1),
-        sender: SenderType.bot,
-      ),
-    ];
-
-Color lighten(Color color) {
-  final hsl = HSLColor.fromColor(color);
-  final light = hsl.withLightness((hsl.lightness + 0.3).clamp(0.0, 1.0));
-  return light.toColor();
+List<Booking> buildDummyBookings(List<Hotel> hotels) {
+  if (hotels.length < 2) return [];
+  return [
+    Booking(id: 'b1', hotel: hotels[0], date: DateTime.now().add(const Duration(days: 5)), nights: 3, guests: 2),
+    Booking(id: 'b2', hotel: hotels[1], date: DateTime.now().subtract(const Duration(days: 20)), nights: 2, guests: 1, status: BookingStatus.completed),
+  ];
 }
+
+List<Reward> buildDummyRewards() {
+  return [
+    Reward(title: 'Spa voucher', points: 1200),
+    Reward(title: 'Suite upgrade', points: 2600),
+    Reward(title: 'Late checkout', points: 800),
+  ];
+}
+
+List<Color> primaryChoices = const [
+  Color(0xFF5B714A),
+  Color(0xFF6A8F4E),
+  Color(0xFF3A6B57),
+  Color(0xFFB3A369),
+];

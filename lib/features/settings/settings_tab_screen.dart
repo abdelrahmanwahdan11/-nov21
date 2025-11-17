@@ -1,118 +1,67 @@
 import 'package:flutter/material.dart';
-
-import '../../controllers/bookings_controller.dart';
 import '../../controllers/hotels_controller.dart';
 import '../../controllers/settings_controller.dart';
 import '../../controllers/theme_controller.dart';
-import '../home/favorites_screen.dart';
-import '../rewards_profile/my_trips_screen.dart';
 import '../../core/localization/app_localizations.dart';
+import '../../core/utils/dummy_data.dart';
 
 class SettingsTabScreen extends StatelessWidget {
-  const SettingsTabScreen({
-    super.key,
-    required this.themeController,
-    required this.settingsController,
-    required this.hotelsController,
-    required this.bookingsController,
-  });
+  const SettingsTabScreen({super.key, required this.themeController, required this.settingsController, required this.hotelsController, required this.bookingsController});
 
   final ThemeController themeController;
   final SettingsController settingsController;
   final HotelsController hotelsController;
-  final BookingsController bookingsController;
+  final dynamic bookingsController;
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context);
-    final colors = [
-      const Color(0xFF4F6F52),
-      const Color(0xFF6E8F4B),
-      const Color(0xFF3B5D3A),
-      const Color(0xFF8C6C4F),
-    ];
+    final t = Localizations.of<AppLocalizations>(context, AppLocalizations)!;
     return AnimatedBuilder(
       animation: Listenable.merge([themeController, settingsController]),
-      builder: (context, _) {
+      builder: (_, __) {
         return ListView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           children: [
-            Text(t.translate('language'), style: Theme.of(context).textTheme.titleMedium),
-            Row(
-              children: AppLocalizations.supportedLocales
-                  .map((locale) => Expanded(
-                        child: RadioListTile<Locale>(
-                          title: Text(locale.languageCode.toUpperCase()),
-                          value: locale,
-                          groupValue: settingsController.locale,
-                          onChanged: (value) => settingsController.updateLocale(value!),
-                        ),
-                      ))
-                  .toList(),
-            ),
             SwitchListTile(
-              title: Text(t.translate('dark_mode')),
-              value: themeController.isDark,
-              onChanged: (_) => themeController.toggleDark(),
+              value: themeController.mode == ThemeMode.dark,
+              onChanged: themeController.toggleDark,
+              title: Text(t.translate('theme')),
             ),
-            SwitchListTile(
-              title: Text(t.translate('reduce_animations')),
-              value: settingsController.reduceMotion,
-              onChanged: (_) => settingsController.toggleMotion(),
+            ListTile(
+              title: Text(t.translate('language')),
+              trailing: DropdownButton<Locale>(
+                value: settingsController.locale,
+                onChanged: (loc) => settingsController.setLocale(loc ?? const Locale('en')),
+                items: const [
+                  DropdownMenuItem(value: Locale('en'), child: Text('English')),
+                  DropdownMenuItem(value: Locale('ar'), child: Text('العربية')),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
-            Text(t.translate('primary_color'), style: Theme.of(context).textTheme.titleMedium),
+            const Divider(),
+            Text(t.translate('primary_color')),
             Wrap(
-              spacing: 12,
-              children: colors
-                  .map((color) => GestureDetector(
-                        onTap: () => themeController.updatePrimary(color),
+              spacing: 8,
+              children: primaryChoices
+                  .map((c) => GestureDetector(
+                        onTap: () => themeController.setPrimary(c),
                         child: Container(
-                          width: 48,
-                          height: 48,
+                          width: 36,
+                          height: 36,
                           decoration: BoxDecoration(
-                            color: color,
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color: themeController.primaryColor == color
-                                  ? Colors.white
-                                  : Colors.transparent,
-                              width: 3,
-                            ),
+                            color: c,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: themeController.primaryColor == c ? Colors.black : Colors.transparent, width: 2),
                           ),
                         ),
                       ))
                   .toList(),
             ),
-            const SizedBox(height: 24),
-            ListTile(
-              leading: const Icon(Icons.event_available_outlined),
-              title: Text(t.translate('my_bookings')),
-              subtitle: Text(t.translate('trip_manager_subtitle')),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => MyTripsScreen(bookingsController: bookingsController),
-                ),
-              ),
+            SwitchListTile(
+              value: settingsController.reduceMotion,
+              onChanged: settingsController.toggleReduceMotion,
+              title: const Text('Reduce motion'),
             ),
-            ListTile(
-              leading: const Icon(Icons.favorite_outline),
-              title: Text(t.translate('favorites')),
-              subtitle: Text(t.translate('favorites_subtitle')),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => FavoritesScreen(
-                    hotelsController: hotelsController,
-                    bookingsController: bookingsController,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            ListTile(
-              title: Text(t.translate('about')),
-              subtitle: Text(t.translate('version')),
-            )
           ],
         );
       },
