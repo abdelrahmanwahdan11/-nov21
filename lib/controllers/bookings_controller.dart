@@ -88,6 +88,30 @@ class BookingsController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleDocument(String bookingId, String title) {
+    _bookings = _bookings
+        .map(
+          (b) => b.id == bookingId
+              ? b.copyWith(
+                  documents: b.documents
+                      .map((doc) => doc.title == title ? doc.copyWith(ready: !doc.ready) : doc)
+                      .toList(),
+                )
+              : b,
+        )
+        .toList();
+    notifyListeners();
+  }
+
+  void addJournalEntry(String bookingId, TripJournalEntry entry) {
+    _bookings = _bookings
+        .map(
+          (b) => b.id == bookingId ? b.copyWith(journal: [...b.journal, entry]) : b,
+        )
+        .toList();
+    notifyListeners();
+  }
+
   void completeChecklist(String bookingId) {
     _bookings = _bookings
         .map(

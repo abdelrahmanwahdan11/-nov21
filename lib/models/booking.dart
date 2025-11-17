@@ -18,6 +18,8 @@ class Booking {
     this.isRefundable = true,
     this.pointsEarned = 0,
     this.tasks = const [],
+    this.documents = const [],
+    this.journal = const [],
   });
 
   final String id;
@@ -34,6 +36,8 @@ class Booking {
   final bool isRefundable;
   final int pointsEarned;
   final List<TripTask> tasks;
+  final List<TravelDocument> documents;
+  final List<TripJournalEntry> journal;
 
   String get hotelName => hotel.name;
   String get city => hotel.city;
@@ -43,6 +47,9 @@ class Booking {
   double get checklistProgress => tasks.isEmpty
       ? 1
       : tasks.where((task) => task.done).length / tasks.length;
+  double get docsProgress => documents.isEmpty
+      ? 1
+      : documents.where((doc) => doc.ready).length / documents.length;
 
   Booking copyWith({
     String? id,
@@ -59,6 +66,8 @@ class Booking {
     bool? isRefundable,
     int? pointsEarned,
     List<TripTask>? tasks,
+    List<TravelDocument>? documents,
+    List<TripJournalEntry>? journal,
   }) {
     return Booking(
       id: id ?? this.id,
@@ -75,6 +84,8 @@ class Booking {
       isRefundable: isRefundable ?? this.isRefundable,
       pointsEarned: pointsEarned ?? this.pointsEarned,
       tasks: tasks ?? this.tasks,
+      documents: documents ?? this.documents,
+      journal: journal ?? this.journal,
     );
   }
 }
@@ -89,6 +100,38 @@ class TripTask {
     return TripTask(
       title: title ?? this.title,
       done: done ?? this.done,
+    );
+  }
+}
+
+class TravelDocument {
+  const TravelDocument({required this.title, this.ready = false, this.detail});
+
+  final String title;
+  final bool ready;
+  final String? detail;
+
+  TravelDocument copyWith({String? title, bool? ready, String? detail}) {
+    return TravelDocument(
+      title: title ?? this.title,
+      ready: ready ?? this.ready,
+      detail: detail ?? this.detail,
+    );
+  }
+}
+
+class TripJournalEntry {
+  const TripJournalEntry({required this.title, required this.createdAt, this.detail});
+
+  final String title;
+  final DateTime createdAt;
+  final String? detail;
+
+  TripJournalEntry copyWith({String? title, DateTime? createdAt, String? detail}) {
+    return TripJournalEntry(
+      title: title ?? this.title,
+      createdAt: createdAt ?? this.createdAt,
+      detail: detail ?? this.detail,
     );
   }
 }

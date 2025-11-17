@@ -156,6 +156,22 @@ class _TripCard extends StatelessWidget {
                 Text('${(booking.checklistProgress * 100).round()}%'),
               ],
             ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(IconlyLight.document),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: LinearProgressIndicator(
+                    value: booking.docsProgress,
+                    minHeight: 6,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text('${(booking.docsProgress * 100).round()}%'),
+              ],
+            ),
             const SizedBox(height: 12),
             Row(
               children: [

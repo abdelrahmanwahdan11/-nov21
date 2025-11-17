@@ -99,6 +99,18 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
         TripTask(title: 'Share arrival time with hotel'),
         TripTask(title: 'Add pillow preference', done: true),
       ],
+      documents: const [
+        TravelDocument(title: 'Passport copy', ready: true),
+        TravelDocument(title: 'Visa PDF'),
+        TravelDocument(title: 'Vaccination card', ready: true),
+      ],
+      journal: [
+        TripJournalEntry(
+          title: 'Spa booking confirmed',
+          createdAt: DateTime.now().subtract(const Duration(days: 2)),
+          detail: 'Reserved couples massage at 6 PM on day 2.',
+        ),
+      ],
     ),
     Booking(
       id: 'b2',
@@ -116,6 +128,17 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
         TripTask(title: 'Upload passport copy', done: true),
         TripTask(title: 'Request quiet room'),
         TripTask(title: 'Add late checkout request'),
+      ],
+      documents: const [
+        TravelDocument(title: 'Boarding pass', ready: true),
+        TravelDocument(title: 'Work permit letter'),
+      ],
+      journal: [
+        TripJournalEntry(
+          title: 'Checked in via app',
+          createdAt: DateTime.now().subtract(const Duration(hours: 6)),
+          detail: 'Mobile key ready at 4 PM.',
+        ),
       ],
     ),
     Booking(
@@ -136,6 +159,21 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
         TripTask(title: 'Review stay notes', done: true),
         TripTask(title: 'Add loyalty number', done: true),
         TripTask(title: 'Share checkout feedback', done: true),
+      ],
+      documents: const [
+        TravelDocument(title: 'Passport copy', ready: true),
+        TravelDocument(title: 'Metro card reload', ready: true),
+      ],
+      journal: [
+        TripJournalEntry(
+          title: 'Great rooftop breakfast',
+          createdAt: DateTime.now().subtract(const Duration(days: 18)),
+          detail: 'Ask for corner table, best sunrise view.',
+        ),
+        TripJournalEntry(
+          title: 'Late checkout approved',
+          createdAt: DateTime.now().subtract(const Duration(days: 17)),
+        ),
       ],
     ),
   ];
