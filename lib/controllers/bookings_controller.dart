@@ -119,6 +119,37 @@ class BookingsController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleTransfer(String bookingId, String title) {
+    _bookings = _bookings
+        .map(
+          (b) => b.id == bookingId
+              ? b.copyWith(
+                  transfers: b.transfers
+                      .map((transfer) =>
+                          transfer.title == title ? transfer.copyWith(confirmed: !transfer.confirmed) : transfer)
+                      .toList(),
+                )
+              : b,
+        )
+        .toList();
+    notifyListeners();
+  }
+
+  void toggleDining(String bookingId, String venue) {
+    _bookings = _bookings
+        .map(
+          (b) => b.id == bookingId
+              ? b.copyWith(
+                  dining: b.dining
+                      .map((res) => res.venue == venue ? res.copyWith(confirmed: !res.confirmed) : res)
+                      .toList(),
+                )
+              : b,
+        )
+        .toList();
+    notifyListeners();
+  }
+
   void togglePacking(String bookingId, String title) {
     _bookings = _bookings
         .map(

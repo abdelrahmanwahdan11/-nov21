@@ -23,6 +23,8 @@ class Booking {
     this.segments = const [],
     this.packing = const [],
     this.budgets = const [],
+    this.transfers = const [],
+    this.dining = const [],
   });
 
   final String id;
@@ -44,6 +46,8 @@ class Booking {
   final List<TripSegment> segments;
   final List<PackingItem> packing;
   final List<TripBudget> budgets;
+  final List<TransferPlan> transfers;
+  final List<DiningReservation> dining;
 
   String get hotelName => hotel.name;
   String get city => hotel.city;
@@ -65,6 +69,11 @@ class Booking {
   double get budgetPlanned => budgets.fold(0, (sum, b) => sum + b.planned);
   double get budgetSpent => budgets.fold(0, (sum, b) => sum + b.spent);
   double get budgetProgress => budgetPlanned == 0 ? 0 : budgetSpent / budgetPlanned;
+  double get transferProgress => transfers.isEmpty
+      ? 1
+      : transfers.where((transfer) => transfer.confirmed).length / transfers.length;
+  double get diningProgress =>
+      dining.isEmpty ? 1 : dining.where((res) => res.confirmed).length / dining.length;
 
   Booking copyWith({
     String? id,
@@ -86,6 +95,8 @@ class Booking {
     List<TripSegment>? segments,
     List<PackingItem>? packing,
     List<TripBudget>? budgets,
+    List<TransferPlan>? transfers,
+    List<DiningReservation>? dining,
   }) {
     return Booking(
       id: id ?? this.id,
@@ -107,6 +118,8 @@ class Booking {
       segments: segments ?? this.segments,
       packing: packing ?? this.packing,
       budgets: budgets ?? this.budgets,
+      transfers: transfers ?? this.transfers,
+      dining: dining ?? this.dining,
     );
   }
 }
@@ -121,6 +134,55 @@ class TripTask {
     return TripTask(
       title: title ?? this.title,
       done: done ?? this.done,
+    );
+  }
+}
+
+class TransferPlan {
+  const TransferPlan({
+    required this.title,
+    required this.time,
+    this.contact,
+    this.note,
+    this.confirmed = false,
+  });
+
+  final String title;
+  final String time;
+  final String? contact;
+  final String? note;
+  final bool confirmed;
+
+  TransferPlan copyWith({String? title, String? time, String? contact, String? note, bool? confirmed}) {
+    return TransferPlan(
+      title: title ?? this.title,
+      time: time ?? this.time,
+      contact: contact ?? this.contact,
+      note: note ?? this.note,
+      confirmed: confirmed ?? this.confirmed,
+    );
+  }
+}
+
+class DiningReservation {
+  const DiningReservation({
+    required this.venue,
+    required this.time,
+    this.note,
+    this.confirmed = false,
+  });
+
+  final String venue;
+  final String time;
+  final String? note;
+  final bool confirmed;
+
+  DiningReservation copyWith({String? venue, String? time, String? note, bool? confirmed}) {
+    return DiningReservation(
+      venue: venue ?? this.venue,
+      time: time ?? this.time,
+      note: note ?? this.note,
+      confirmed: confirmed ?? this.confirmed,
     );
   }
 }

@@ -231,6 +231,42 @@ class _TripCard extends StatelessWidget {
                 ),
               ],
             ),
+            if (booking.transfers.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(IconlyLight.location),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: LinearProgressIndicator(
+                      value: booking.transferProgress,
+                      minHeight: 6,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text('${(booking.transferProgress * 100).round()}%'),
+                ],
+              ),
+            ],
+            if (booking.dining.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(IconlyLight.activity),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: LinearProgressIndicator(
+                      value: booking.diningProgress,
+                      minHeight: 6,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text('${(booking.diningProgress * 100).round()}%'),
+                ],
+              ),
+            ],
             if (nextStop != null) ...[
               const SizedBox(height: 6),
               Row(

@@ -188,51 +188,155 @@ class BookingDetailScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 16),
-                        _SectionTitle(title: t.translate('trip_preparation')),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).cardColor,
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: LinearProgressIndicator(
-                                      value: booking.checklistProgress,
-                                      minHeight: 6,
-                                      borderRadius: BorderRadius.circular(12),
+                          _SectionTitle(title: t.translate('arrival_transfers')),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: LinearProgressIndicator(
+                                        value: booking.transferProgress,
+                                        minHeight: 6,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text('${(booking.transferProgress * 100).round()}%'),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                if (booking.transfers.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                    child: Text(t.translate('travel_support')),
+                                  )
+                                else
+                                  ...booking.transfers.map(
+                                    (transfer) => SwitchListTile(
+                                      dense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                      title: Text(transfer.title),
+                                      subtitle: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(transfer.time),
+                                          if (transfer.contact != null)
+                                            Text('${t.translate('contact')}: ${transfer.contact}'),
+                                          if (transfer.note != null) Text(transfer.note!),
+                                        ],
+                                      ),
+                                      value: transfer.confirmed,
+                                      onChanged: (_) => controller.toggleTransfer(booking.id, transfer.title),
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
-                                  Text('${(booking.checklistProgress * 100).round()}%'),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              ...booking.tasks.map(
-                                (task) => CheckboxListTile(
-                                  value: task.done,
-                                  dense: true,
-                                  contentPadding: EdgeInsets.zero,
-                                  title: Text(task.title),
-                                  onChanged: (_) => controller.toggleTask(booking.id, task.title),
-                                ),
-                              ),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: TextButton(
-                                  onPressed: () => controller.completeChecklist(booking.id),
-                                  child: Text(t.translate('complete_all')),
-                                ),
-                              )
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('dining_plans')),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: LinearProgressIndicator(
+                                        value: booking.diningProgress,
+                                        minHeight: 6,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text('${(booking.diningProgress * 100).round()}%'),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                if (booking.dining.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                    child: Text(t.translate('dining_plans')),
+                                  )
+                                else
+                                  ...booking.dining.map(
+                                    (res) => SwitchListTile(
+                                      dense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                      title: Text(res.venue),
+                                      subtitle: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(res.time),
+                                          if (res.note != null) Text(res.note!),
+                                        ],
+                                      ),
+                                      value: res.confirmed,
+                                      onChanged: (_) => controller.toggleDining(booking.id, res.venue),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _SectionTitle(title: t.translate('trip_preparation')),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: LinearProgressIndicator(
+                                        value: booking.checklistProgress,
+                                        minHeight: 6,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text('${(booking.checklistProgress * 100).round()}%'),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                ...booking.tasks.map(
+                                  (task) => CheckboxListTile(
+                                    value: task.done,
+                                    dense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                    title: Text(task.title),
+                                    onChanged: (_) => controller.toggleTask(booking.id, task.title),
+                                  ),
+                                ),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton(
+                                    onPressed: () => controller.completeChecklist(booking.id),
+                                    child: Text(t.translate('complete_all')),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
                         _SectionTitle(title: t.translate('travel_documents')),
                         const SizedBox(height: 8),
                         Container(

@@ -94,6 +94,30 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
       perks: const ['Late checkout', 'Club lounge access'],
       transport: 'Complimentary airport pickup',
       pointsEarned: 480,
+      transfers: const [
+        TransferPlan(
+          title: 'Airport pickup',
+          time: 'Day 1 · 3:00 PM',
+          contact: 'Driver Karim · +971 55 321 2222',
+          note: 'Meet at arrivals gate 6',
+        ),
+        TransferPlan(
+          title: 'Return drop-off',
+          time: 'Day 4 · 12:30 PM',
+          contact: 'Front desk sedan',
+        ),
+      ],
+      dining: const [
+        DiningReservation(
+          venue: 'Saffron Garden',
+          time: 'Day 1 · 8:00 PM',
+          note: 'Terrace table requested',
+        ),
+        DiningReservation(
+          venue: 'Sky Lounge',
+          time: 'Day 2 · 6:30 PM',
+        ),
+      ],
       packing: const [
         PackingItem(title: 'Smart casual outfits'),
         PackingItem(title: 'Swimming gear', packed: true),
@@ -158,6 +182,30 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
       perks: const ['Breakfast included'],
       transport: 'Ride-share credit ready',
       pointsEarned: 260,
+      transfers: const [
+        TransferPlan(
+          title: 'Ride share to hotel',
+          time: 'Day 1 · 9:00 AM',
+          contact: 'Use corporate code',
+          confirmed: true,
+        ),
+        TransferPlan(
+          title: 'Return to airport',
+          time: 'Day 3 · 5:00 PM',
+          note: 'Book 2 hours before departure',
+        ),
+      ],
+      dining: const [
+        DiningReservation(
+          venue: 'Executive lounge breakfast',
+          time: 'Daily · 7:30 AM',
+          confirmed: true,
+        ),
+        DiningReservation(
+          venue: 'Lobby espresso bar',
+          time: 'Day 1 · 6:00 PM',
+        ),
+      ],
       packing: const [
         PackingItem(title: 'Business attire', packed: true),
         PackingItem(title: 'Laptop & charger', packed: true),
@@ -217,6 +265,33 @@ List<Booking> buildDummyBookings(List<Hotel> hotels) {
       note: 'Quiet room requested',
       isRefundable: false,
       pointsEarned: 180,
+      transfers: const [
+        TransferPlan(
+          title: 'Metro to hotel',
+          time: 'Day 1 · 2:00 PM',
+          contact: 'Red line · stop 12',
+          confirmed: true,
+        ),
+        TransferPlan(
+          title: 'Airport drop-off',
+          time: 'Day 3 · 11:00 AM',
+          note: 'Taxi pre-booked',
+          confirmed: true,
+        ),
+      ],
+      dining: const [
+        DiningReservation(
+          venue: 'Garden café',
+          time: 'Day 1 · 1:00 PM',
+          confirmed: true,
+        ),
+        DiningReservation(
+          venue: 'Rooftop mezze',
+          time: 'Day 2 · 8:00 PM',
+          note: 'Ask for corner view',
+          confirmed: true,
+        ),
+      ],
       packing: const [
         PackingItem(title: 'Light jacket', packed: true),
         PackingItem(title: 'Reusable bottle', packed: true),
