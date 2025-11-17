@@ -8,6 +8,7 @@ import '../home/favorites_screen.dart';
 import 'my_trips_screen.dart';
 import 'reward_options_screen.dart';
 import 'rewards_wallet_screen.dart';
+import 'travel_dashboard_screen.dart';
 
 class RewardsProfileTabScreen extends StatelessWidget {
   const RewardsProfileTabScreen({super.key, required this.bookingsController, required this.hotelsController});
@@ -194,6 +195,22 @@ class _QuickActions extends StatelessWidget {
                 icon: IconlyBold.wallet,
                 onTap: () => Navigator.of(context)
                     .push(MaterialPageRoute(builder: (_) => RewardsWalletScreen(bookingsController: bookingsController))),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _ActionCard(
+                label: t.translate('readiness_hub'),
+                icon: IconlyBold.shield_done,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => TravelDashboardScreen(controller: bookingsController),
+                  ),
+                ),
               ),
             ),
           ],

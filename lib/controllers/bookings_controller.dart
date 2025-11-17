@@ -19,6 +19,43 @@ class BookingsController extends ChangeNotifier {
   List<Booking> get past =>
       _bookings.where((b) => b.status == BookingStatus.completed || b.status == BookingStatus.cancelled).toList();
   int get pointsBalance => _points;
+  int get totalTrips => _bookings.length;
+  double get averageActiveReadiness {
+    final active = [...upcoming, ...inHouse];
+    if (active.isEmpty) return 0;
+    return active.map((b) => b.readinessScore).reduce((a, b) => a + b) / active.length;
+  }
+
+  Booking? get nextTrip {
+    final list = [...upcoming];
+    list.sort((a, b) => a.checkIn.compareTo(b.checkIn));
+    return list.isEmpty ? null : list.first;
+  }
+
+  int get pendingAlertsCount => _bookings
+      .expand((b) => b.alerts)
+      .where((alert) => !alert.acknowledged)
+      .length;
+
+  int get openTasksCount => _bookings
+      .expand((b) => b.tasks)
+      .where((task) => !task.done)
+      .length;
+
+  double get documentsCompletion {
+    final docs = _bookings.expand((b) => b.documents).toList();
+    if (docs.isEmpty) return 1;
+    final ready = docs.where((doc) => doc.ready).length;
+    return ready / docs.length;
+  }
+
+  Map<String, int> get cityVisitCounts {
+    final map = <String, int>{};
+    for (final booking in _bookings) {
+      map[booking.city] = (map[booking.city] ?? 0) + 1;
+    }
+    return map;
+  }
 
   void seedHotels(List<Hotel> hotels) {
     if (_seeded || hotels.isEmpty) return;
