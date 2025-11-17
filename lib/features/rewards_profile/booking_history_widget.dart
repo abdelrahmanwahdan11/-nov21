@@ -1,28 +1,33 @@
 import 'package:flutter/material.dart';
 
+import '../../controllers/bookings_controller.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../models/booking.dart';
 
 class BookingHistoryWidget extends StatelessWidget {
-  const BookingHistoryWidget({super.key, required this.bookings});
+  const BookingHistoryWidget({super.key, required this.bookingsController});
 
-  final List<Booking> bookings;
+  final BookingsController bookingsController;
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
-    final upcoming = bookings.where((b) => b.date.isAfter(now)).toList();
-    final past = bookings.where((b) => !b.date.isAfter(now)).toList();
     final t = AppLocalizations.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (upcoming.isNotEmpty) _buildSection(context, t.translate('upcoming'), upcoming),
-        if (past.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          _buildSection(context, t.translate('past'), past),
-        ],
-      ],
+    return AnimatedBuilder(
+      animation: bookingsController,
+      builder: (context, _) {
+        final upcoming = bookingsController.upcoming.toList();
+        final past = bookingsController.past.toList();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (upcoming.isNotEmpty) _buildSection(context, t.translate('upcoming'), upcoming),
+            if (past.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _buildSection(context, t.translate('past'), past),
+            ],
+          ],
+        );
+      },
     );
   }
 
@@ -55,7 +60,12 @@ class BookingHistoryWidget extends StatelessWidget {
                     children: [
                       Text(booking.hotelName, style: Theme.of(context).textTheme.titleMedium),
                       const SizedBox(height: 4),
-                      Text('${booking.nights} nights · ${booking.date.toLocal().toString().split(' ').first}',
+                      Text(
+                        '${booking.nights} nights · ${booking.checkIn.toLocal().toString().split(' ').first}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 4),
+                      Text('${booking.guests} guests · ${booking.checkOut.toLocal().toString().split(' ').first}',
                           style: Theme.of(context).textTheme.bodySmall),
                     ],
                   ),

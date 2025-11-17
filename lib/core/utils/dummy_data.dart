@@ -49,18 +49,48 @@ List<Hotel> generateHotels() {
   return hotels;
 }
 
-List<Booking> generateBookings() => List.generate(
-      4,
-      (index) => Booking(
-        id: 'book_$index',
-        hotelName: 'Serenity ${index + 2}',
-        date: index.isEven
-            ? DateTime.now().add(Duration(days: 6 * (index + 1)))
-            : DateTime.now().subtract(Duration(days: 10 * (index + 1))),
-        nights: 2 + index,
-        price: 150 + index * 40,
+List<Booking> generateBookings() => [
+      Booking(
+        id: 'book_1',
+        hotelName: 'Serenity Downtown',
+        city: 'Dubai',
+        checkIn: DateTime.now().add(const Duration(days: 4)),
+        nights: 3,
+        guests: 2,
+        price: 540,
+        status: BookingStatus.upcoming,
       ),
-    );
+      Booking(
+        id: 'book_2',
+        hotelName: 'Serenity Marina',
+        city: 'Dubai',
+        checkIn: DateTime.now().add(const Duration(days: 12)),
+        nights: 2,
+        guests: 3,
+        price: 420,
+        status: BookingStatus.upcoming,
+      ),
+      Booking(
+        id: 'book_3',
+        hotelName: 'Serenity Oasis',
+        city: 'Cairo',
+        checkIn: DateTime.now().subtract(const Duration(days: 6)),
+        nights: 2,
+        guests: 2,
+        price: 360,
+        status: BookingStatus.completed,
+      ),
+      Booking(
+        id: 'book_4',
+        hotelName: 'Serenity Corniche',
+        city: 'Beirut',
+        checkIn: DateTime.now().subtract(const Duration(days: 16)),
+        nights: 4,
+        guests: 1,
+        price: 760,
+        status: BookingStatus.cancelled,
+      ),
+    ];
 
 List<Reward> generateRewards() => const [
       Reward(

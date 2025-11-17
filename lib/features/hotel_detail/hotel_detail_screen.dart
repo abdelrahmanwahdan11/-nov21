@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../../controllers/bookings_controller.dart';
 import '../../core/localization/app_localizations.dart';
+import '../../models/booking.dart';
 import '../../models/hotel.dart';
 import 'hotel_detail_flip_card_widget.dart';
 import 'hotel_image_overlay_widget.dart';
 
 class HotelDetailScreen extends StatefulWidget {
-  const HotelDetailScreen({super.key, required this.hotel});
+  const HotelDetailScreen({super.key, required this.hotel, required this.bookingsController});
 
   final Hotel hotel;
+  final BookingsController bookingsController;
 
   @override
   State<HotelDetailScreen> createState() => _HotelDetailScreenState();
@@ -198,6 +201,18 @@ class _HotelDetailScreenState extends State<HotelDetailScreen> {
               ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
+                  widget.bookingsController.addBooking(
+                    Booking(
+                      id: 'booking_${DateTime.now().millisecondsSinceEpoch}',
+                      hotelName: widget.hotel.name,
+                      city: widget.hotel.city,
+                      checkIn: checkIn,
+                      nights: nights,
+                      guests: guests,
+                      price: total,
+                      status: BookingStatus.upcoming,
+                    ),
+                  );
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(t.translate('booking_confirmed'))),
                   );

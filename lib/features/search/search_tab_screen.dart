@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../controllers/bookings_controller.dart';
 import '../../controllers/comparison_controller.dart';
 import '../../controllers/hotels_controller.dart';
 import '../../controllers/search_controller.dart';
@@ -18,11 +19,13 @@ class SearchTabScreen extends StatelessWidget {
     required this.hotelsController,
     required this.searchController,
     required this.comparisonController,
+    required this.bookingsController,
   });
 
   final HotelsController hotelsController;
   final SearchController searchController;
   final ComparisonController comparisonController;
+  final BookingsController bookingsController;
 
   @override
   Widget build(BuildContext context) {
@@ -156,7 +159,14 @@ class SearchTabScreen extends StatelessWidget {
               ...hotels.map((hotel) => HotelCardWidget(
                     hotel: hotel,
                     onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (_) => HotelDetailScreen(hotel: hotel)));
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => HotelDetailScreen(
+                            hotel: hotel,
+                            bookingsController: bookingsController,
+                          ),
+                        ),
+                      );
                     },
                     onAiInfo: () => _showAiInfo(context),
                     onToggleCompare: () => comparisonController.toggleHotel(hotel),

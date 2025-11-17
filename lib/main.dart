@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'controllers/auth_controller.dart';
+import 'controllers/bookings_controller.dart';
 import 'controllers/chat_controller.dart';
 import 'controllers/comparison_controller.dart';
 import 'controllers/hotels_controller.dart';
@@ -34,6 +35,7 @@ void main() async {
     authController.load(),
   ]);
   final hotelsController = HotelsController();
+  final bookingsController = BookingsController();
   final searchController = SearchController(hotelsController);
   final comparisonController = ComparisonController();
   final chatController = ChatController();
@@ -42,6 +44,7 @@ void main() async {
     settingsController: settingsController,
     authController: authController,
     hotelsController: hotelsController,
+    bookingsController: bookingsController,
     searchController: searchController,
     comparisonController: comparisonController,
     chatController: chatController,
@@ -55,6 +58,7 @@ class RoamifyApp extends StatefulWidget {
     required this.settingsController,
     required this.authController,
     required this.hotelsController,
+    required this.bookingsController,
     required this.searchController,
     required this.comparisonController,
     required this.chatController,
@@ -64,6 +68,7 @@ class RoamifyApp extends StatefulWidget {
   final SettingsController settingsController;
   final AuthController authController;
   final HotelsController hotelsController;
+  final BookingsController bookingsController;
   final SearchController searchController;
   final ComparisonController comparisonController;
   final ChatController chatController;
@@ -95,6 +100,7 @@ class _RoamifyAppState extends State<RoamifyApp> {
           home: RootRouter(
             authController: widget.authController,
             hotelsController: widget.hotelsController,
+            bookingsController: widget.bookingsController,
             searchController: widget.searchController,
             comparisonController: widget.comparisonController,
             themeController: widget.themeController,
@@ -112,6 +118,7 @@ class RootRouter extends StatefulWidget {
     super.key,
     required this.authController,
     required this.hotelsController,
+    required this.bookingsController,
     required this.searchController,
     required this.comparisonController,
     required this.themeController,
@@ -121,6 +128,7 @@ class RootRouter extends StatefulWidget {
 
   final AuthController authController;
   final HotelsController hotelsController;
+  final BookingsController bookingsController;
   final SearchController searchController;
   final ComparisonController comparisonController;
   final ThemeController themeController;
@@ -145,6 +153,7 @@ class _RootRouterState extends State<RootRouter> {
         }
         return MainShell(
           hotelsController: widget.hotelsController,
+          bookingsController: widget.bookingsController,
           searchController: widget.searchController,
           comparisonController: widget.comparisonController,
           themeController: widget.themeController,
@@ -160,6 +169,7 @@ class MainShell extends StatefulWidget {
   const MainShell({
     super.key,
     required this.hotelsController,
+    required this.bookingsController,
     required this.searchController,
     required this.comparisonController,
     required this.themeController,
@@ -168,6 +178,7 @@ class MainShell extends StatefulWidget {
   });
 
   final HotelsController hotelsController;
+  final BookingsController bookingsController;
   final SearchController searchController;
   final ComparisonController comparisonController;
   final ThemeController themeController;
@@ -196,17 +207,21 @@ class _MainShellState extends State<MainShell> {
           HomeTabScreen(
             hotelsController: widget.hotelsController,
             comparisonController: widget.comparisonController,
+            bookingsController: widget.bookingsController,
           ).animate(target: reduceMotion ? 0 : 1).fadeIn(duration: 400.ms).slide(begin: const Offset(0.1, 0)),
           SearchTabScreen(
             hotelsController: widget.hotelsController,
             searchController: widget.searchController,
             comparisonController: widget.comparisonController,
+            bookingsController: widget.bookingsController,
           ).animate(target: reduceMotion ? 0 : 1).fadeIn(duration: 400.ms).slide(begin: const Offset(0.1, 0)),
           AiChatTabScreen(controller: widget.chatController),
-          RewardsProfileTabScreen(),
+          RewardsProfileTabScreen(bookingsController: widget.bookingsController),
           SettingsTabScreen(
             themeController: widget.themeController,
             settingsController: widget.settingsController,
+            hotelsController: widget.hotelsController,
+            bookingsController: widget.bookingsController,
           ),
         ];
         return Scaffold(

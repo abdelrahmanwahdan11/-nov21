@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:iconly/iconly.dart';
 
+import '../../controllers/bookings_controller.dart';
 import '../../controllers/comparison_controller.dart';
 import '../../controllers/hotels_controller.dart';
 import '../../core/localization/app_localizations.dart';
@@ -14,10 +15,16 @@ import 'hotel_card_widget.dart';
 import 'featured_3d_carousel_widget.dart';
 
 class HomeTabScreen extends StatefulWidget {
-  const HomeTabScreen({super.key, required this.hotelsController, required this.comparisonController});
+  const HomeTabScreen({
+    super.key,
+    required this.hotelsController,
+    required this.comparisonController,
+    required this.bookingsController,
+  });
 
   final HotelsController hotelsController;
   final ComparisonController comparisonController;
+  final BookingsController bookingsController;
 
   @override
   State<HomeTabScreen> createState() => _HomeTabScreenState();
@@ -80,7 +87,12 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
               ...hotels.map((hotel) => HotelCardWidget(
                     hotel: hotel,
                     onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => HotelDetailScreen(hotel: hotel)),
+                      MaterialPageRoute(
+                        builder: (_) => HotelDetailScreen(
+                          hotel: hotel,
+                          bookingsController: widget.bookingsController,
+                        ),
+                      ),
                     ),
                     onAiInfo: () => _showAiInfo(context),
                     onToggleCompare: () => widget.comparisonController.toggleHotel(hotel),

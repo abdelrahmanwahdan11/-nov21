@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
 
+import '../../controllers/bookings_controller.dart';
+import '../../controllers/hotels_controller.dart';
 import '../../controllers/settings_controller.dart';
 import '../../controllers/theme_controller.dart';
+import '../home/favorites_screen.dart';
+import '../rewards_profile/my_trips_screen.dart';
 import '../../core/localization/app_localizations.dart';
 
 class SettingsTabScreen extends StatelessWidget {
-  const SettingsTabScreen({super.key, required this.themeController, required this.settingsController});
+  const SettingsTabScreen({
+    super.key,
+    required this.themeController,
+    required this.settingsController,
+    required this.hotelsController,
+    required this.bookingsController,
+  });
 
   final ThemeController themeController;
   final SettingsController settingsController;
+  final HotelsController hotelsController;
+  final BookingsController bookingsController;
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +85,30 @@ class SettingsTabScreen extends StatelessWidget {
                   .toList(),
             ),
             const SizedBox(height: 24),
+            ListTile(
+              leading: const Icon(Icons.event_available_outlined),
+              title: Text(t.translate('my_bookings')),
+              subtitle: Text(t.translate('trip_manager_subtitle')),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => MyTripsScreen(bookingsController: bookingsController),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.favorite_outline),
+              title: Text(t.translate('favorites')),
+              subtitle: Text(t.translate('favorites_subtitle')),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => FavoritesScreen(
+                    hotelsController: hotelsController,
+                    bookingsController: bookingsController,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
             ListTile(
               title: Text(t.translate('about')),
               subtitle: Text(t.translate('version')),

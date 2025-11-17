@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../../controllers/bookings_controller.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
-import '../../models/booking.dart';
 import '../../models/reward.dart';
+import 'my_trips_screen.dart';
 import 'booking_history_widget.dart';
 import 'reward_options_screen.dart';
 
 class RewardsProfileTabScreen extends StatelessWidget {
-  RewardsProfileTabScreen({super.key});
+  RewardsProfileTabScreen({super.key, required this.bookingsController});
 
   final List<Reward> rewards = generateRewards();
-  final List<Booking> bookings = generateBookings();
+  final BookingsController bookingsController;
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +39,19 @@ class RewardsProfileTabScreen extends StatelessWidget {
               trailing: Text('${reward.points} pts'),
             )),
         const SizedBox(height: 24),
+        ElevatedButton.icon(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => MyTripsScreen(bookingsController: bookingsController),
+            ),
+          ),
+          icon: const Icon(Icons.event_available_outlined),
+          label: Text(t.translate('my_bookings')),
+        ),
+        const SizedBox(height: 12),
         Text(t.translate('booking_history'), style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        BookingHistoryWidget(bookings: bookings),
+        BookingHistoryWidget(bookingsController: bookingsController),
       ],
     );
   }
